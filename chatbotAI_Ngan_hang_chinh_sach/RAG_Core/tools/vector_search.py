@@ -37,7 +37,7 @@ try:
 
     # 3. Hardcode key (TEMPORARY - chỉ cho dev/testing)
     if not cohere_api_key:
-        cohere_api_key = "NoQ9Jjvz5r1JeRWZG8L9dnl8BxYljmnOdiUfTnfk"
+        cohere_api_key = ""
         logger.warning("⚠️ Using hardcoded COHERE_API_KEY (not recommended for production)")
 
     if not cohere_api_key or cohere_api_key == "your-api-key-here":
