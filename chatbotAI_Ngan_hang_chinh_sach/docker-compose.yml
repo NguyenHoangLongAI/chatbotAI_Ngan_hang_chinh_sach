@@ -1,0 +1,190 @@
+networks:
+  ai-net: {}
+
+volumes:
+  milvus_data:
+  minio_data:
+  etcd_data:
+
+services:
+  # =============== ETCD ===============
+  etcd:
+    image: gcr.io/etcd-development/etcd:v3.5.23
+    pull_policy: always
+    container_name: etcd
+    command: >
+      /usr/local/bin/etcd
+      --name s1
+      --data-dir=/etcd-data
+      --listen-client-urls=http://0.0.0.0:2379
+      --advertise-client-urls=http://etcd:2379
+      --listen-peer-urls=http://0.0.0.0:2380
+      --initial-advertise-peer-urls=http://etcd:2380
+      --initial-cluster s1=http://etcd:2380
+      --initial-cluster-token etcd-cluster
+      --initial-cluster-state new
+    environment:
+      - ETCDCTL_API=3
+    volumes:
+      - etcd_data:/etcd-data
+    networks:
+      - ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/etcdctl", "--endpoints=http://127.0.0.1:2379", "endpoint", "health"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  # ================== MinIO ==================
+  minio:
+    image: minio/minio:latest
+    pull_policy: always
+    container_name: minio
+    command: server /data --console-address ":9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio_data:/data
+    ports:
+      - "19100:9000"
+      - "19101:9001"
+    networks:
+      - ai-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://127.0.0.1:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  # ================== Milvus ==================
+  milvus:
+    image: milvusdb/milvus:v2.3.0
+    pull_policy: always
+    container_name: milvus
+    command: ["milvus", "run", "standalone"]
+    environment:
+      - ETCD_ENDPOINTS=etcd:2379
+      - MINIO_ADDRESS=minio:9000
+      - MINIO_ACCESS_KEY_ID=minioadmin
+      - MINIO_SECRET_ACCESS_KEY=minioadmin
+      - MINIO_USE_SSL=false
+    volumes:
+      - milvus_data:/var/lib/milvus
+    ports:
+      - "19532:19530"
+    networks:
+      - ai-net
+    depends_on:
+      etcd:  { condition: service_healthy }
+      minio: { condition: service_healthy }
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsSL http://127.0.0.1:9091/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  # ================== Attu ==================
+  attu:
+    image: zilliz/attu:latest
+    pull_policy: always
+    container_name: attu
+    environment:
+      - MILVUS_URL=milvus:19530
+    ports:
+      - "13000:3000"
+    networks:
+      - ai-net
+    depends_on:
+      - milvus
+    restart: unless-stopped
+
+  # ================== Document API (port 18000) ==================
+  document-api:
+    image: du-an-ai:latest
+    pull_policy: never
+    container_name: document-api
+    working_dir: /app/Embedding_vectorDB
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu, compute, utility]
+    environment:
+      - CUDA_VISIBLE_DEVICES=0
+      - NVIDIA_VISIBLE_DEVICES=0
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+      - USE_GPU=true
+      - USE_DOCLING=false
+      - USE_OCR=true
+      - OCR_LANGUAGES=vi,en
+      - MINIO_INTERNAL_ENDPOINT=minio:9000
+      - MINIO_PUBLIC_ENDPOINT=localhost:19100
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=public-documents
+      - MINIO_SECURE=false
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8022"]
+    volumes:
+      - ./uploads:/app/uploads
+      - ./models:/app/models
+    ports:
+      - "18000:8022"
+    networks:
+      - ai-net
+    depends_on:
+      milvus: { condition: service_healthy }
+      minio:  { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import socket,sys; s=socket.socket(); s.settimeout(2); sys.exit(0 if s.connect_ex(('127.0.0.1',8000))==0 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 180s
+    restart: unless-stopped
+
+
+  # ================== RAG Core API (port 18501) ==================
+  rag-api:
+    image: du-an-ai:latest
+    pull_policy: never
+    container_name: rag-api
+    working_dir: /app/RAG_Core
+    environment:
+      - OLLAMA_URL=http://host.docker.internal:11434
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - LLM_MODEL=gpt-oss:20b
+      - MILVUS_HOST=milvus
+      - MILVUS_PORT=19530
+      - MINIO_INTERNAL_ENDPOINT=minio:9000
+      - MINIO_PUBLIC_ENDPOINT=localhost:19100
+      - NGROK_PUBLIC_URL=http://124.158.6.101:19100
+      - NO_PROXY=ollama,localhost,127.0.0.1,host.docker.internal
+      - no_proxy=ollama,localhost,127.0.0.1,host.docker.internal
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8522"]
+    ports:
+      - "18501:8501"
+    networks:
+      - ai-net
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      document-api: { condition: service_started }
+      milvus:       { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "python3 -c \"import socket,sys; s=socket.socket(); s.settimeout(2); sys.exit(0 if s.connect_ex(('127.0.0.1',8522))==0 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
