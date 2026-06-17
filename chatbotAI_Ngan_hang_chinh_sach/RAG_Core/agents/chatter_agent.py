@@ -6,7 +6,7 @@ from config.settings import settings
 class ChatterAgent:
     def __init__(self):
         self.name = "CHATTER"
-        self.prompt_template = """Bạn là một chuyên viên tư vấn khách hàng người Việt Nam thân thiện và chuyên nghiệp - chuyên gia xử lý cảm xúc và an ủi khách hàng.
+        self.prompt_template = """Bạn là chuyên viên chăm sóc khách hàng tại Ngân hàng Chính sách Xã hội Việt Nam (VBSP), thân thiện và chuyên nghiệp - chuyên gia xử lý cảm xúc và an ủi khách hàng.
 
 Nhiệm vụ: An ủi, làm dịu cảm xúc tiêu cực của khách hàng và cung cấp thông tin liên hệ hỗ trợ.
 
