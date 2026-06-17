@@ -1,0 +1,75 @@
+# ============================================================
+# Vietnamese Document Pipeline — Dependencies
+# PaddleOCR v3.7.0 + PP-StructureV3 + ProtonX Text Correction
+# (Merged từ requirements cũ PaddleOCR-VL + requirements mới)
+# ============================================================
+
+# ── Web API ───────────────────────────────────────────────────
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+pydantic==2.8.2
+pydantic-settings==2.3.0
+python-multipart==0.0.9
+requests==2.32.3
+
+# ── Core OCR Engine ──────────────────────────────────────────
+# PaddleOCR v3.7.0 với PP-OCRv5 + PP-StructureV3
+# THAY THẾ hoàn toàn PaddleOCR-VL HuggingFace model
+paddleocr==3.7.0
+
+# PaddlePaddle framework — chọn 1 trong 3 tùy môi trường:
+# GPU CUDA 11.x:  paddlepaddle-gpu==3.0.0.post112
+# GPU CUDA 12.x:  paddlepaddle-gpu==3.0.0.post126
+# CPU only:
+paddlepaddle==3.0.0
+
+# ── TORCH (CUDA 12.1) — dùng cho sentence-transformers + embedding ──
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.2.2+cu121
+torchvision==0.17.2+cu121
+
+# ── Transformers — chỉ cần cho embedding, KHÔNG dùng PaddleOCR-VL nữa ──
+transformers>=4.51.0
+tokenizers>=0.20.0
+accelerate>=0.28.0
+sentence-transformers==2.6.0
+
+# ── Vietnamese Text Correction (ProtonX) ─────────────────────
+# Offline mode: tự download model từ HuggingFace lần đầu
+# Models: teacher (904MB) / student (507MB) / nano
+protonx>=0.1.8
+
+# ── PDF Processing ────────────────────────────────────────────
+pdfplumber>=0.10.0
+pdf2image>=1.17.0
+# NOTE: poppler-utils phải install qua apt:
+#   sudo apt-get install -y poppler-utils
+
+# ── Image Processing ──────────────────────────────────────────
+Pillow>=10.0.0
+numpy==1.26.4
+# opencv-python: dùng headless để tránh conflict trong Docker
+opencv-python-headless==4.8.1.78
+
+# ── Office Document Processing ────────────────────────────────
+python-docx==1.1.2
+pandas==2.1.4
+openpyxl==3.1.5
+markdown==3.5.1
+
+# ── Vector DB ─────────────────────────────────────────────────
+pymilvus==2.3.4
+
+# ── Object Storage ────────────────────────────────────────────
+minio>=7.2.0
+
+# ── LangChain (RAG Core) ──────────────────────────────────────
+langchain-core==0.2.23
+langchain-community==0.2.10
+langchain-ollama==0.1.0
+langgraph==0.0.50
+
+# ── OCR Fallback (Tesseract) — chỉ dùng khi PaddleOCR fail ──
+# TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+pytesseract
+

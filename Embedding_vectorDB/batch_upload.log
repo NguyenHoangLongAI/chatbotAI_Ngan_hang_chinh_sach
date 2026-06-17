@@ -1,0 +1,393 @@
+2026-06-08 16:28:32,146  WARNING   ⚠️   API trạng thái không healthy: {'error': {'message': '인증이 필요합니다.', 'code': 'AUTH_UNAUTHENTICATED'}}
+2026-06-08 16:28:32,146  ERROR     Thư mục không tồn tại: Embedding_vectorDB/Tai_lieu_training
+2026-06-08 16:30:12,316  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'ocr_backend': 'PaddleOCR-VL', 'services': {'milvus': True, 'embedding_model': True, 'minio': False, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 16:30:12,316  ERROR     Thư mục không tồn tại: Embedding_vectorDB/Tai_lieu_training
+2026-06-08 16:31:03,766  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'ocr_backend': 'PaddleOCR-VL', 'services': {'milvus': True, 'embedding_model': True, 'minio': False, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 16:31:03,767  INFO      ======================================================================
+2026-06-08 16:31:03,767  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 16:31:03,767  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 16:31:03,767  INFO      📦  Chunk   : smart
+2026-06-08 16:31:03,767  INFO      ⚙️   Workers : 1
+2026-06-08 16:31:03,767  INFO      📄  Tổng file: 5
+2026-06-08 16:31:03,767  INFO      ======================================================================
+2026-06-08 16:31:03,768  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 16:31:08,888  INFO      ❌  [FAILED ]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     5.1s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7112E675621DB, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:09,890  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 16:31:16,412  INFO      ❌  [FAILED ]  Phụ lục 02-HDSD_VBSP_BE.docx                 6.5s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B711302949D389, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:17,419  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 16:31:26,503  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     9.1s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7113282C07BF4, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:27,506  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 16:31:38,714  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                        11.2s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B711355BA48FC7, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:39,715  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 16:31:48,234  INFO      ❌  [FAILED ]  VanBanDen2409967.pdf                         8.5s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71137931D2E2E, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:48,234  INFO      ======================================================================
+2026-06-08 16:31:48,234  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 0  |  ❌ 5  |  Thời gian: 44.5s
+2026-06-08 16:31:48,235  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-08 16:31:48,235  WARNING     ❌  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7112E675621DB, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:48,235  WARNING     ❌  Phụ lục 02-HDSD_VBSP_BE.docx: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B711302949D389, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:48,235  WARNING     ❌  VNPT_Tai lieu gioi thieu san pham vnportal.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7113282C07BF4, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:48,235  WARNING     ❌  VanBanDen2400488.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B711355BA48FC7, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:48,235  WARNING     ❌  VanBanDen2409967.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71137931D2E2E, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 16:31:48,236  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 16:31:48,237  INFO      ======================================================================
+2026-06-08 17:08:17,265  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'ocr_backend': 'PaddleOCR-VL', 'services': {'milvus': True, 'embedding_model': True, 'minio': False, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 17:08:17,266  INFO      ======================================================================
+2026-06-08 17:08:17,266  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 17:08:17,266  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 17:08:17,266  INFO      📦  Chunk   : smart
+2026-06-08 17:08:17,266  INFO      ⚙️   Workers : 1
+2026-06-08 17:08:17,266  INFO      📄  Tổng file: 5
+2026-06-08 17:08:17,266  INFO      ======================================================================
+2026-06-08 17:08:17,266  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 17:08:20,187  INFO      ❌  [FAILED ]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     2.9s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71335DD2432CB, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:21,189  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 17:08:30,767  INFO      ❌  [FAILED ]  Phụ lục 02-HDSD_VBSP_BE.docx                 9.6s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71338638E73B0, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:31,775  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 17:08:41,594  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     9.8s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7133AE97A0532, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:42,596  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 17:08:51,346  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                         8.7s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7133D231372C1, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:52,348  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 17:08:52,353  INFO      ❌  [FAILED ]  VanBanDen2409967.pdf                         0.0s  HTTPConnectionPool(host='localhost', port=8022): Max retries exceeded with url: /api/v1/process-document (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8022): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-06-08 17:08:52,354  INFO      ======================================================================
+2026-06-08 17:08:52,354  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 0  |  ❌ 5  |  Thời gian: 35.1s
+2026-06-08 17:08:52,354  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-08 17:08:52,354  WARNING     ❌  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71335DD2432CB, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:52,354  WARNING     ❌  Phụ lục 02-HDSD_VBSP_BE.docx: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71338638E73B0, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:52,354  WARNING     ❌  VNPT_Tai lieu gioi thieu san pham vnportal.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7133AE97A0532, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:52,355  WARNING     ❌  VanBanDen2400488.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7133D231372C1, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:08:52,355  WARNING     ❌  VanBanDen2409967.pdf: HTTPConnectionPool(host='localhost', port=8022): Max retries exceeded with url: /api/v1/process-document (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8022): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-06-08 17:08:52,356  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 17:08:52,356  INFO      ======================================================================
+2026-06-08 17:11:24,652  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'ocr_backend': 'PaddleOCR-VL', 'services': {'milvus': True, 'embedding_model': True, 'minio': False, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 17:11:24,653  INFO      ======================================================================
+2026-06-08 17:11:24,653  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 17:11:24,653  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 17:11:24,653  INFO      📦  Chunk   : smart
+2026-06-08 17:11:24,653  INFO      ⚙️   Workers : 1
+2026-06-08 17:11:24,653  INFO      📄  Tổng file: 5
+2026-06-08 17:11:24,653  INFO      ======================================================================
+2026-06-08 17:11:24,653  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 17:11:28,321  INFO      ❌  [FAILED ]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     3.7s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71361BB63578D, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:11:29,323  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 17:11:36,442  INFO      ❌  [FAILED ]  Phụ lục 02-HDSD_VBSP_BE.docx                 7.1s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B713639E330D6A, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:11:37,450  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 17:11:47,014  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     9.6s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7136615350A2B, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:11:48,017  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 17:11:58,773  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                        10.8s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71368D2209211, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:11:59,775  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 17:12:08,448  INFO      ❌  [FAILED ]  VanBanDen2409967.pdf                         8.7s  HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7136B0AB8FF6B, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:12:08,448  INFO      ======================================================================
+2026-06-08 17:12:08,448  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 0  |  ❌ 5  |  Thời gian: 43.8s
+2026-06-08 17:12:08,449  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-08 17:12:08,449  WARNING     ❌  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71361BB63578D, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:12:08,449  WARNING     ❌  Phụ lục 02-HDSD_VBSP_BE.docx: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B713639E330D6A, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:12:08,449  WARNING     ❌  VNPT_Tai lieu gioi thieu san pham vnportal.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7136615350A2B, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:12:08,449  WARNING     ❌  VanBanDen2400488.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B71368D2209211, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:12:08,449  WARNING     ❌  VanBanDen2409967.pdf: HTTP 500: {"detail":"Processing error: S3 operation failed; code: AccessDenied, message: Access Denied., resource: /public-documents, request_id: 18B7136B0AB8FF6B, host_id: 02c9de06-d612-4ab2-ad4c-e8e49dfd043d, bucket_name: public-documents"}
+2026-06-08 17:12:08,451  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 17:12:08,451  INFO      ======================================================================
+2026-06-08 17:13:26,432  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'ocr_backend': 'PaddleOCR-VL', 'services': {'milvus': True, 'embedding_model': True, 'minio': False, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 17:13:26,433  INFO      ======================================================================
+2026-06-08 17:13:26,433  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 17:13:26,433  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 17:13:26,433  INFO      📦  Chunk   : smart
+2026-06-08 17:13:26,433  INFO      ⚙️   Workers : 1
+2026-06-08 17:13:26,433  INFO      📄  Tổng file: 5
+2026-06-08 17:13:26,433  INFO      ======================================================================
+2026-06-08 17:13:26,433  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 17:13:28,898  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     2.5s  chunks=14 | vectors=14 | url=N/A
+2026-06-08 17:13:29,900  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 17:13:39,234  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 9.3s  chunks=53 | vectors=53 | url=N/A
+2026-06-08 17:13:40,241  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 17:13:48,816  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     8.6s  chunks=47 | vectors=47 | url=N/A
+2026-06-08 17:13:49,818  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 17:13:59,861  INFO      ✅  [SUCCESS]  VanBanDen2400488.pdf                        10.0s  chunks=45 | vectors=45 | url=N/A
+2026-06-08 17:14:00,863  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 17:14:12,185  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                        11.3s  chunks=2 | vectors=2 | url=N/A
+2026-06-08 17:14:12,185  INFO      ======================================================================
+2026-06-08 17:14:12,185  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 5  |  ❌ 0  |  Thời gian: 45.8s
+2026-06-08 17:14:12,187  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 17:14:12,187  INFO      ======================================================================
+2026-06-08 17:36:42,812  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 17:36:42,813  INFO      ======================================================================
+2026-06-08 17:36:42,814  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 17:36:42,814  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 17:36:42,814  INFO      📦  Chunk   : smart
+2026-06-08 17:36:42,814  INFO      ⚙️   Workers : 1
+2026-06-08 17:36:42,814  INFO      📄  Tổng file: 5
+2026-06-08 17:36:42,814  INFO      ======================================================================
+2026-06-08 17:36:42,814  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 17:36:45,254  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     2.4s  chunks=14 | vectors=14 | url=N/A
+2026-06-08 17:36:46,256  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 17:36:54,876  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 8.6s  chunks=53 | vectors=53 | url=N/A
+2026-06-08 17:36:55,883  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 17:37:04,501  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     8.6s  chunks=47 | vectors=47 | url=N/A
+2026-06-08 17:37:05,503  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 17:37:17,628  INFO      ✅  [SUCCESS]  VanBanDen2400488.pdf                        12.1s  chunks=45 | vectors=45 | url=N/A
+2026-06-08 17:37:18,630  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 17:37:26,981  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                         8.4s  chunks=2 | vectors=2 | url=N/A
+2026-06-08 17:37:26,982  INFO      ======================================================================
+2026-06-08 17:37:26,982  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 5  |  ❌ 0  |  Thời gian: 44.2s
+2026-06-08 17:37:26,983  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 17:37:26,983  INFO      ======================================================================
+2026-06-08 17:40:18,017  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 17:40:18,018  INFO      ======================================================================
+2026-06-08 17:40:18,018  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 17:40:18,018  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 17:40:18,018  INFO      📦  Chunk   : smart
+2026-06-08 17:40:18,018  INFO      ⚙️   Workers : 1
+2026-06-08 17:40:18,019  INFO      📄  Tổng file: 5
+2026-06-08 17:40:18,019  INFO      ======================================================================
+2026-06-08 17:40:18,019  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 17:40:22,565  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.5s  chunks=14 | vectors=14 | url=N/A
+2026-06-08 17:40:23,567  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 17:40:32,529  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 9.0s  chunks=53 | vectors=53 | url=N/A
+2026-06-08 17:40:33,537  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 17:40:42,006  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     8.5s  chunks=47 | vectors=47 | url=N/A
+2026-06-08 17:40:43,008  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 17:40:49,915  INFO      ✅  [SUCCESS]  VanBanDen2400488.pdf                         6.9s  chunks=45 | vectors=45 | url=N/A
+2026-06-08 17:40:50,916  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 17:40:54,950  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                         4.0s  chunks=2 | vectors=2 | url=N/A
+2026-06-08 17:40:54,950  INFO      ======================================================================
+2026-06-08 17:40:54,950  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 5  |  ❌ 0  |  Thời gian: 36.9s
+2026-06-08 17:40:54,951  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 17:40:54,952  INFO      ======================================================================
+2026-06-08 17:48:55,826  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-08 17:48:55,827  INFO      ======================================================================
+2026-06-08 17:48:55,827  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-08 17:48:55,827  INFO      🌐  API URL : http://localhost:8022
+2026-06-08 17:48:55,827  INFO      📦  Chunk   : smart
+2026-06-08 17:48:55,827  INFO      ⚙️   Workers : 1
+2026-06-08 17:48:55,827  INFO      📄  Tổng file: 5
+2026-06-08 17:48:55,827  INFO      ======================================================================
+2026-06-08 17:48:55,827  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-08 17:49:00,375  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.5s  chunks=14 | vectors=14 | url=N/A
+2026-06-08 17:49:01,377  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-08 17:49:09,223  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 7.8s  chunks=53 | vectors=53 | url=N/A
+2026-06-08 17:49:10,232  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-08 17:49:18,741  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf     8.5s  chunks=47 | vectors=47 | url=N/A
+2026-06-08 17:49:19,743  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-08 17:49:26,727  INFO      ✅  [SUCCESS]  VanBanDen2400488.pdf                         7.0s  chunks=45 | vectors=45 | url=N/A
+2026-06-08 17:49:27,728  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-08 17:49:31,526  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                         3.8s  chunks=2 | vectors=2 | url=N/A
+2026-06-08 17:49:31,527  INFO      ======================================================================
+2026-06-08 17:49:31,527  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 5  |  ❌ 0  |  Thời gian: 35.7s
+2026-06-08 17:49:31,528  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-08 17:49:31,528  INFO      ======================================================================
+2026-06-09 09:18:00,653  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-09 09:18:00,654  INFO      ======================================================================
+2026-06-09 09:18:00,654  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 09:18:00,654  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 09:18:00,654  INFO      📦  Chunk   : smart
+2026-06-09 09:18:00,654  INFO      ⚙️   Workers : 1
+2026-06-09 09:18:00,654  INFO      📄  Tổng file: 5
+2026-06-09 09:18:00,654  INFO      ======================================================================
+2026-06-09 09:18:00,654  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 09:18:05,184  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.5s  chunks=14 | vectors=14 | url=N/A
+2026-06-09 09:18:06,186  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 09:18:14,527  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 8.3s  chunks=53 | vectors=53 | url=N/A
+2026-06-09 09:18:15,535  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 09:27:58,239  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': False, 'smart_chunking': 'enabled'}}
+2026-06-09 09:27:58,240  INFO      ======================================================================
+2026-06-09 09:27:58,241  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 09:27:58,241  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 09:27:58,241  INFO      📦  Chunk   : smart
+2026-06-09 09:27:58,241  INFO      ⚙️   Workers : 1
+2026-06-09 09:27:58,241  INFO      📄  Tổng file: 5
+2026-06-09 09:27:58,241  INFO      ======================================================================
+2026-06-09 09:27:58,241  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 09:28:03,240  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     5.0s  chunks=14 | vectors=14 | url=N/A
+2026-06-09 09:28:04,242  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 09:28:12,710  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 8.5s  chunks=53 | vectors=53 | url=N/A
+2026-06-09 09:28:13,719  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 09:54:55,418  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 09:54:55,418  INFO      ======================================================================
+2026-06-09 09:54:55,419  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 09:54:55,419  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 09:54:55,419  INFO      📦  Chunk   : smart
+2026-06-09 09:54:55,419  INFO      ⚙️   Workers : 1
+2026-06-09 09:54:55,419  INFO      📄  Tổng file: 5
+2026-06-09 09:54:55,419  INFO      ======================================================================
+2026-06-09 09:54:55,419  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 09:55:00,259  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.8s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 09:55:01,260  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 09:55:07,502  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 6.2s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 09:55:08,507  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 10:04:35,799  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 10:04:35,800  INFO      ======================================================================
+2026-06-09 10:04:35,800  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 10:04:35,800  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 10:04:35,800  INFO      📦  Chunk   : smart
+2026-06-09 10:04:35,800  INFO      ⚙️   Workers : 1
+2026-06-09 10:04:35,800  INFO      📄  Tổng file: 5
+2026-06-09 10:04:35,800  INFO      ======================================================================
+2026-06-09 10:04:35,800  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 10:04:40,222  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.4s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 10:04:41,224  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 10:04:48,354  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 7.1s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 10:04:49,361  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 10:09:15,619  ERROR     ❌  Không kết nối được API http://localhost:8022: HTTPConnectionPool(host='localhost', port=8022): Read timed out. (read timeout=10)
+2026-06-09 10:09:15,619  ERROR     Dừng: API không phản hồi.
+2026-06-09 10:26:23,488  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 10:26:23,488  INFO      ======================================================================
+2026-06-09 10:26:23,489  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 10:26:23,489  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 10:26:23,489  INFO      📦  Chunk   : smart
+2026-06-09 10:26:23,489  INFO      ⚙️   Workers : 1
+2026-06-09 10:26:23,489  INFO      📄  Tổng file: 5
+2026-06-09 10:26:23,489  INFO      ======================================================================
+2026-06-09 10:26:23,489  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 10:26:28,313  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.8s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 10:26:29,315  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 10:26:35,586  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 6.3s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 10:26:36,593  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 10:31:36,612  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf   300.0s  Timeout sau 300s
+2026-06-09 10:31:37,626  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-09 10:36:37,748  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                       300.1s  Timeout sau 300s
+2026-06-09 10:36:38,750  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-09 10:41:38,873  INFO      ❌  [FAILED ]  VanBanDen2409967.pdf                       300.1s  Timeout sau 300s
+2026-06-09 10:41:38,874  INFO      ======================================================================
+2026-06-09 10:41:38,874  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 2  |  ❌ 3  |  Thời gian: 915.4s
+2026-06-09 10:41:38,874  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-09 10:41:38,874  WARNING     ❌  VNPT_Tai lieu gioi thieu san pham vnportal.pdf: Timeout sau 300s
+2026-06-09 10:41:38,874  WARNING     ❌  VanBanDen2400488.pdf: Timeout sau 300s
+2026-06-09 10:41:38,874  WARNING     ❌  VanBanDen2409967.pdf: Timeout sau 300s
+2026-06-09 10:41:38,876  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-09 10:41:38,876  INFO      ======================================================================
+2026-06-09 11:18:49,017  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 11:18:49,029  INFO      ======================================================================
+2026-06-09 11:18:49,029  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 11:18:49,029  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 11:18:49,029  INFO      📦  Chunk   : smart
+2026-06-09 11:18:49,029  INFO      ⚙️   Workers : 1
+2026-06-09 11:18:49,029  INFO      📄  Tổng file: 5
+2026-06-09 11:18:49,029  INFO      ======================================================================
+2026-06-09 11:18:49,029  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 11:18:54,291  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     5.3s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 11:18:55,293  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 11:19:02,851  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 7.6s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 11:19:03,860  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 11:24:04,006  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf   300.1s  Timeout sau 300s
+2026-06-09 11:24:05,007  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-09 11:25:45,215  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                       100.2s  ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+2026-06-09 11:25:46,216  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-09 11:25:46,222  INFO      ❌  [FAILED ]  VanBanDen2409967.pdf                         0.0s  HTTPConnectionPool(host='localhost', port=8022): Max retries exceeded with url: /api/v1/process-document (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8022): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-06-09 11:25:46,222  INFO      ======================================================================
+2026-06-09 11:25:46,222  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 2  |  ❌ 3  |  Thời gian: 417.2s
+2026-06-09 11:25:46,222  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-09 11:25:46,223  WARNING     ❌  VNPT_Tai lieu gioi thieu san pham vnportal.pdf: Timeout sau 300s
+2026-06-09 11:25:46,223  WARNING     ❌  VanBanDen2400488.pdf: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+2026-06-09 11:25:46,223  WARNING     ❌  VanBanDen2409967.pdf: HTTPConnectionPool(host='localhost', port=8022): Max retries exceeded with url: /api/v1/process-document (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8022): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-06-09 11:25:46,224  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-09 11:25:46,224  INFO      ======================================================================
+2026-06-09 11:26:36,592  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 11:26:36,592  INFO      ======================================================================
+2026-06-09 11:26:36,593  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 11:26:36,593  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 11:26:36,593  INFO      📦  Chunk   : smart
+2026-06-09 11:26:36,593  INFO      ⚙️   Workers : 1
+2026-06-09 11:26:36,593  INFO      📄  Tổng file: 5
+2026-06-09 11:26:36,593  INFO      ======================================================================
+2026-06-09 11:26:36,593  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 11:26:41,768  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     5.2s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 11:26:42,769  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 11:26:50,318  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 7.5s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 11:26:51,325  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 11:31:51,437  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf   300.1s  Timeout sau 300s
+2026-06-09 11:31:52,438  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-09 11:35:54,109  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 11:35:54,110  INFO      ======================================================================
+2026-06-09 11:35:54,110  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 11:35:54,110  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 11:35:54,110  INFO      📦  Chunk   : smart
+2026-06-09 11:35:54,110  INFO      ⚙️   Workers : 1
+2026-06-09 11:35:54,110  INFO      📄  Tổng file: 5
+2026-06-09 11:35:54,110  INFO      ======================================================================
+2026-06-09 11:35:54,110  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 11:35:59,275  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     5.2s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 11:36:00,277  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 11:36:07,005  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 6.7s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 11:36:08,012  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 11:41:08,120  INFO      ❌  [FAILED ]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf   300.1s  Timeout sau 300s
+2026-06-09 11:41:09,121  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-09 11:46:09,207  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                       300.1s  Timeout sau 300s
+2026-06-09 11:46:10,209  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-09 11:51:10,286  INFO      ❌  [FAILED ]  VanBanDen2409967.pdf                       300.1s  Timeout sau 300s
+2026-06-09 11:51:10,287  INFO      ======================================================================
+2026-06-09 11:51:10,287  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 2  |  ❌ 3  |  Thời gian: 916.2s
+2026-06-09 11:51:10,287  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-09 11:51:10,287  WARNING     ❌  VNPT_Tai lieu gioi thieu san pham vnportal.pdf: Timeout sau 300s
+2026-06-09 11:51:10,287  WARNING     ❌  VanBanDen2400488.pdf: Timeout sau 300s
+2026-06-09 11:51:10,287  WARNING     ❌  VanBanDen2409967.pdf: Timeout sau 300s
+2026-06-09 11:51:10,288  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-09 11:51:10,288  INFO      ======================================================================
+2026-06-09 11:55:33,371  ERROR     ❌  Không kết nối được API http://localhost:8022: HTTPConnectionPool(host='localhost', port=8022): Max retries exceeded with url: /api/v1/health (Caused by NewConnectionError("HTTPConnection(host='localhost', port=8022): Failed to establish a new connection: [Errno 111] Connection refused"))
+2026-06-09 11:55:33,371  ERROR     Dừng: API không phản hồi.
+2026-06-09 11:55:57,203  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 11:55:57,203  INFO      ======================================================================
+2026-06-09 11:55:57,203  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 11:55:57,204  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 11:55:57,204  INFO      📦  Chunk   : smart
+2026-06-09 11:55:57,204  INFO      ⚙️   Workers : 1
+2026-06-09 11:55:57,204  INFO      📄  Tổng file: 5
+2026-06-09 11:55:57,204  INFO      ======================================================================
+2026-06-09 11:55:57,204  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 11:56:02,151  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.9s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 11:56:03,153  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 11:56:09,316  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 6.2s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 11:56:10,323  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 11:58:48,038  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf   157.7s  chunks=13 | vectors=13 | url=N/A
+2026-06-09 11:58:49,040  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-09 12:00:49,085  INFO      ✅  [SUCCESS]  VanBanDen2400488.pdf                       120.0s  chunks=7 | vectors=7 | url=N/A
+2026-06-09 12:00:50,086  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-09 12:01:06,779  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                        16.7s  chunks=1 | vectors=1 | url=N/A
+2026-06-09 12:01:06,779  INFO      ======================================================================
+2026-06-09 12:01:06,780  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 5  |  ❌ 0  |  Thời gian: 309.6s
+2026-06-09 12:01:06,781  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-09 12:01:06,781  INFO      ======================================================================
+2026-06-09 13:11:16,875  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '4.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_vl': True, 'smart_chunking': 'enabled'}}
+2026-06-09 13:11:16,876  INFO      ======================================================================
+2026-06-09 13:11:16,876  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-09 13:11:16,876  INFO      🌐  API URL : http://localhost:8022
+2026-06-09 13:11:16,876  INFO      📦  Chunk   : smart
+2026-06-09 13:11:16,876  INFO      ⚙️   Workers : 1
+2026-06-09 13:11:16,876  INFO      📄  Tổng file: 5
+2026-06-09 13:11:16,876  INFO      ======================================================================
+2026-06-09 13:11:16,876  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-09 13:11:21,260  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx     4.4s  chunks=16 | vectors=16 | url=N/A
+2026-06-09 13:11:22,262  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-09 13:11:28,642  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx                 6.4s  chunks=41 | vectors=41 | url=N/A
+2026-06-09 13:11:29,649  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-09 13:14:15,450  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf   165.8s  chunks=13 | vectors=13 | url=N/A
+2026-06-09 13:14:16,452  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-09 13:16:23,140  INFO      ✅  [SUCCESS]  VanBanDen2400488.pdf                       126.7s  chunks=7 | vectors=7 | url=N/A
+2026-06-09 13:16:24,142  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-09 13:16:36,857  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                        12.7s  chunks=1 | vectors=1 | url=N/A
+2026-06-09 13:16:36,857  INFO      ======================================================================
+2026-06-09 13:16:36,857  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 5  |  ❌ 0  |  Thời gian: 320.0s
+2026-06-09 13:16:36,857  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-09 13:16:36,858  INFO      ======================================================================
+2026-06-16 14:55:53,384  INFO      ✅  API sẵn sàng: http://localhost:8022  |  {'status': 'healthy', 'service': 'unified-document-api', 'version': '6.0.0', 'services': {'milvus': True, 'embedding_model': True, 'paddle_ocr_v3': True, 'pp_structure_v3': True, 'protonx_correction': True, 'minio': True}, 'config': {'ocr_engine': 'PaddleOCR v3.7.0 (PP-OCRv5)', 'correction_model': 'student', 'ocr_lang': 'vi', 'use_gpu': True}}
+2026-06-16 14:55:53,385  INFO      ======================================================================
+2026-06-16 14:55:53,385  INFO      📁  Thư mục : /mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training
+2026-06-16 14:55:53,385  INFO      🌐  API URL : http://localhost:8022
+2026-06-16 14:55:53,385  INFO      📦  Chunk   : smart
+2026-06-16 14:55:53,385  INFO      ⚙️   Workers : 1
+2026-06-16 14:55:53,385  INFO      📄  Tổng file: 5
+2026-06-16 14:55:53,385  INFO      ======================================================================
+2026-06-16 14:55:53,385  INFO      [  1/5] HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx
+2026-06-16 14:56:22,052  INFO      ✅  [SUCCESS]  HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx    28.7s  chunks=24 | vectors=? | url=N/A
+2026-06-16 14:56:23,054  INFO      [  2/5] Phụ lục 02-HDSD_VBSP_BE.docx
+2026-06-16 14:58:36,274  INFO      ✅  [SUCCESS]  Phụ lục 02-HDSD_VBSP_BE.docx               133.2s  chunks=57 | vectors=? | url=N/A
+2026-06-16 14:58:37,282  INFO      [  3/5] VNPT_Tai lieu gioi thieu san pham vnportal.pdf
+2026-06-16 14:59:24,366  INFO      ✅  [SUCCESS]  VNPT_Tai lieu gioi thieu san pham vnportal.pdf    47.1s  chunks=58 | vectors=? | url=N/A
+2026-06-16 14:59:25,368  INFO      [  4/5] VanBanDen2400488.pdf
+2026-06-16 15:04:25,500  INFO      ❌  [FAILED ]  VanBanDen2400488.pdf                       300.1s  Timeout sau 300s
+2026-06-16 15:04:26,501  INFO      [  5/5] VanBanDen2409967.pdf
+2026-06-16 15:05:14,378  INFO      ✅  [SUCCESS]  VanBanDen2409967.pdf                        47.9s  chunks=3 | vectors=? | url=N/A
+2026-06-16 15:05:14,378  INFO      ======================================================================
+2026-06-16 15:05:14,379  INFO      🏁  Hoàn thành  |  Tổng: 5  |  ✅ 4  |  ❌ 1  |  Thời gian: 561.0s
+2026-06-16 15:05:14,379  WARNING   ── File lỗi ──────────────────────────────────────────
+2026-06-16 15:05:14,379  WARNING     ❌  VanBanDen2400488.pdf: Timeout sau 300s
+2026-06-16 15:05:14,397  INFO      💾  Kết quả lưu tại: batch_upload_results.json
+2026-06-16 15:05:14,397  INFO      ======================================================================

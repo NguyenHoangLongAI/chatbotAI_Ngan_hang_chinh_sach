@@ -1,0 +1,290 @@
+{
+  "health": {
+    "status_code": 200,
+    "response": {
+      "status": "healthy",
+      "service": "document-api",
+      "port": 8000,
+      "services": {
+        "milvus": true,
+        "embedding_model": true,
+        "document_processor": "ready"
+      },
+      "environment": {
+        "milvus_host": "milvus",
+        "milvus_port": "19530"
+      }
+    },
+    "success": true
+  },
+  "process_text": {
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "status": "success",
+      "filename": "test_document.txt",
+      "original_filename": "test_document.txt",
+      "markdown_content": "# Hướng dẫn sử dụng Trợ lý ảo\n## 1. Giới thiệu\nTrợ lý ảo là một công cụ hỗ trợ người dùng trong việc tra cứu thông tin và giải đáp các câu hỏi.\n### 1.1 Tính năng chính\n- Trả lời câu hỏi tự động\n- Tìm kiếm thông tin\n- Hỗ trợ nhiều ngôn ngữ\n### 1.2 Đối tượng sử dụng\nCác thành viên trong sở nội vụ, người dân, và các cơ quan liên quan.\n## 2. Cách sử dụng\nĐể sử dụng trợ lý ảo, người dùng có thể:\n## 1. Gửi câu hỏi qua giao diện web\n## 2. Sử dụng API để tích hợp vào hệ thống khác\n## 3. Truy cập qua ứng dụng di động\n## 3. Lưu ý quan trọng\n- Đảm bảo câu hỏi rõ ràng và cụ thể\n- Kiểm tra lại thông tin trước khi sử dụng\n- Liên hệ hỗ trợ khi cần thiết",
+      "processing_info": {
+        "file_type": ".txt",
+        "content_length": 646,
+        "file_size_bytes": 848
+      }
+    }
+  },
+  "process_file_txt": {
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "status": "success",
+      "filename": "sample_text.txt",
+      "original_filename": "sample_text.txt",
+      "markdown_content": "# Quy trình xử lý hồ sơ\n## 1. Tiếp nhận hồ sơ\nCông dân nộp hồ sơ tại bộ phận tiếp nhận hoặc qua hệ thống trực tuyến.\n## 2. Kiểm tra hồ sơ\n- Kiểm tra tính đầy đủ của hồ sơ\n- Xác minh thông tin cá nhân\n- Đối chiếu với quy định hiện hành\n## 3. Xử lý hồ sơ\nThời gian xử lý: 15 ngày làm việc kể từ ngày tiếp nhận hồ sơ hợp lệ.\n## 4. Trả kết quả\nThông báo kết quả qua SMS, email hoặc công dân đến trực tiếp để nhận.",
+      "processing_info": {
+        "file_type": ".txt",
+        "content_length": 409,
+        "file_size_bytes": 551
+      }
+    }
+  },
+  "process_file_xlsx": {
+    "status_code": 200,
+    "success": true,
+    "response": {
+      "status": "success",
+      "filename": "sample_table.xlsx",
+      "original_filename": "sample_table.xlsx",
+      "markdown_content": "## Sheet1\n\n**STT**: 1, **Câu hỏi**: Ai sẽ là người sử dụng Trợ lý ảo (TLA), **Trả lời mong muốn**: VD: Các thành viên trong sở nội vụ, người dân, ..., **Chú thích**: Nếu sử dụng nội dung bên ngoài. Câu trả lời có thể khác với những gì TLA được học\n\n**STT**: 2, **Câu hỏi**: Phạm vi trợ lý ảo có thể trả lời, **Trả lời mong muốn**: VD: Các thông tư văn bản được training hay có thể tìm kiếm thông tin bên ngoài để trả lời, **Chú thích**: Cần training dữ liệu phù hợp",
+      "processing_info": {
+        "file_type": ".xlsx",
+        "content_length": 465,
+        "file_size_bytes": 5285
+      }
+    }
+  },
+  "embed_markdown": {
+    "status_code": 500,
+    "success": false,
+    "response": "{\"detail\":\"Embedding error: Collection not initialized\"}"
+  },
+  "add_faq": {
+    "success": true,
+    "total_tests": 3,
+    "passed_tests": 3,
+    "success_rate": 100.0,
+    "results": [
+      {
+        "test_number": 1,
+        "question": "Trợ lý ảo là gì?",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "faq_id": "faq_001",
+          "question": "Trợ lý ảo là gì?",
+          "answer": "Trợ lý ảo là một hệ thống phần mềm sử dụng trí tuệ nhân tạo để hỗ trợ người dùng thực hiện các tác vụ và trả lời câu hỏi.",
+          "message": "FAQ added successfully"
+        }
+      },
+      {
+        "test_number": 2,
+        "question": "Làm thế nào để sử dụng trợ lý ảo?",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "faq_id": "faq_002",
+          "question": "Làm thế nào để sử dụng trợ lý ảo?",
+          "answer": "Bạn có thể sử dụng trợ lý ảo bằng cách gửi câu hỏi qua giao diện web, API, hoặc ứng dụng di động.",
+          "message": "FAQ added successfully"
+        }
+      },
+      {
+        "test_number": 3,
+        "question": "Trợ lý ảo có hỗ trợ tiếng Việt không?",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "faq_id": "faq_980890ba",
+          "question": "Trợ lý ảo có hỗ trợ tiếng Việt không?",
+          "answer": "Có, trợ lý ảo được thiết kế để hỗ trợ tiếng Việt và nhiều ngôn ngữ khác.",
+          "message": "FAQ added successfully"
+        }
+      }
+    ]
+  },
+  "chatbot_ask": {
+    "success": false,
+    "total_tests": 5,
+    "passed_tests": 0,
+    "success_rate": 0.0,
+    "results": [
+      {
+        "test_number": 1,
+        "question": "Trợ lý ảo có những tính năng gì?",
+        "status_code": 404,
+        "success": false,
+        "response_time_seconds": 0.0,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "test_number": 2,
+        "question": "AI có thể giúp tăng năng suất như thế nào?",
+        "status_code": 404,
+        "success": false,
+        "response_time_seconds": 0.0,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "test_number": 3,
+        "question": "Làm thế nào để tối ưu hóa hiệu suất hệ thống?",
+        "status_code": 404,
+        "success": false,
+        "response_time_seconds": 0.0,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "test_number": 4,
+        "question": "Phân tích xu hướng thị trường công nghệ",
+        "status_code": 404,
+        "success": false,
+        "response_time_seconds": 0.0,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "test_number": 5,
+        "question": "Chiến lược marketing hiệu quả cho doanh nghiệp",
+        "status_code": 404,
+        "success": false,
+        "response_time_seconds": 0.0,
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    ]
+  },
+  "chatbot_edge_cases": {
+    "success": true,
+    "results": [
+      {
+        "description": "Empty question",
+        "question": "",
+        "status_code": 404,
+        "success": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "description": "Too short question",
+        "question": "a",
+        "status_code": 404,
+        "success": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "description": "Very long question",
+        "question": "What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?What is the meaning of life?",
+        "status_code": 404,
+        "success": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "description": "Special characters only",
+        "question": "!@#$%^&*()",
+        "status_code": 404,
+        "success": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      },
+      {
+        "description": "Numbers only",
+        "question": "123456789",
+        "status_code": 404,
+        "success": false,
+        "response": "{\"detail\":\"Not Found\"}"
+      }
+    ]
+  },
+  "delete_faq": {
+    "success": true,
+    "total_tests": 3,
+    "passed_tests": 3,
+    "results": [
+      {
+        "test_number": 1,
+        "faq_id": "faq_001",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "faq_id": "faq_001",
+          "message": "FAQ deleted successfully"
+        }
+      },
+      {
+        "test_number": 2,
+        "faq_id": "faq_002",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "faq_id": "faq_002",
+          "message": "FAQ deleted successfully"
+        }
+      },
+      {
+        "test_number": 3,
+        "faq_id": "nonexistent_faq",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "faq_id": "nonexistent_faq",
+          "message": "FAQ deleted successfully"
+        }
+      }
+    ]
+  },
+  "delete_document": {
+    "success": true,
+    "total_tests": 3,
+    "passed_tests": 3,
+    "results": [
+      {
+        "test_number": 1,
+        "document_id": "test_doc_001",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "document_id": "test_doc_001",
+          "message": "Document and all its embeddings deleted successfully"
+        }
+      },
+      {
+        "test_number": 2,
+        "document_id": "workflow_test_doc",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "document_id": "workflow_test_doc",
+          "message": "Document and all its embeddings deleted successfully"
+        }
+      },
+      {
+        "test_number": 3,
+        "document_id": "nonexistent_doc",
+        "status_code": 200,
+        "success": true,
+        "response": {
+          "status": "success",
+          "document_id": "nonexistent_doc",
+          "message": "Document and all its embeddings deleted successfully"
+        }
+      }
+    ]
+  },
+  "full_workflow": {
+    "success": false,
+    "error": "Embedding failed",
+    "step": 2
+  }
+}

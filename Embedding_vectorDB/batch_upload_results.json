@@ -1,0 +1,48 @@
+{
+  "summary": {
+    "total": 5,
+    "success": 4,
+    "failed": 1,
+    "elapsed": 561.0,
+    "directory": "/mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training",
+    "api_url": "http://localhost:8022",
+    "chunk_mode": "smart"
+  },
+  "results": [
+    {
+      "file": "/mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training/HDSD Quan ly TK nguoi su dung Intellect Online tren CoreBank _gop y.docx",
+      "document_id": "HDSD_Quan_ly_TK_nguoi_su_dung_Intellect_Online_tren_CoreBank_gop_y",
+      "status": "SUCCESS",
+      "detail": "chunks=24 | vectors=? | url=N/A",
+      "elapsed": 28.7
+    },
+    {
+      "file": "/mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training/Phụ lục 02-HDSD_VBSP_BE.docx",
+      "document_id": "Phụ_lục_02-HDSD_VBSP_BE",
+      "status": "SUCCESS",
+      "detail": "chunks=57 | vectors=? | url=N/A",
+      "elapsed": 133.2
+    },
+    {
+      "file": "/mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training/VNPT_Tai lieu gioi thieu san pham vnportal.pdf",
+      "document_id": "VNPT_Tai_lieu_gioi_thieu_san_pham_vnportal",
+      "status": "SUCCESS",
+      "detail": "chunks=58 | vectors=? | url=N/A",
+      "elapsed": 47.1
+    },
+    {
+      "file": "/mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training/VanBanDen2400488.pdf",
+      "document_id": "VanBanDen2400488",
+      "status": "FAILED",
+      "detail": "Timeout sau 300s",
+      "elapsed": 300.1
+    },
+    {
+      "file": "/mnt/data/nhlong22/chatbotAI_Ngan_hang_chinh_sach/Embedding_vectorDB/Tai_lieu_training/VanBanDen2409967.pdf",
+      "document_id": "VanBanDen2409967",
+      "status": "SUCCESS",
+      "detail": "chunks=3 | vectors=? | url=N/A",
+      "elapsed": 47.9
+    }
+  ]
+}
