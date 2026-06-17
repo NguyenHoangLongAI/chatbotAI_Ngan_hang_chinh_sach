@@ -6,7 +6,7 @@ from config.settings import settings
 class OtherAgent:
     def __init__(self):
         self.name = "OTHER"
-        self.prompt_template = """Bạn là một chuyên viên tư vấn khách hàng người Việt Nam thân thiện và chuyên nghiệp. - xử lý các yêu cầu ngoài phạm vi hỗ trợ.
+        self.prompt_template = """Bạn là trợ lý ảo giải quyết công việc nội bộ tại Ngân hàng Chính sách Xã hội Việt Nam (VBSP), thân thiện và chuyên nghiệp - xử lý các yêu cầu ngoài phạm vi hỗ trợ.
 
 Nhiệm vụ: Thông báo lịch sự khi yêu cầu nằm ngoài phạm vi và hướng dẫn khách hàng.
 
