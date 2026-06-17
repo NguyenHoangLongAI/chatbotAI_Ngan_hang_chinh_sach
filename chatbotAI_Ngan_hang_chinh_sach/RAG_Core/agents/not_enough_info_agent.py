@@ -8,9 +8,9 @@ class NotEnoughInfoAgent:
         self.name = "NOT_ENOUGH_INFO"
 
         # Prompt mới: yêu cầu LLM trả lời dựa trên kiến thức của nó
-        self.prompt_template = """Bạn là nhân viên tư vấn khách hàng.
+        self.prompt_template = """Bạn là  trợ lý ảo giải quyết công việc nội bộ tại Ngân hàng Chính sách Xã hội Việt Nam (VBSP).
 
-        TÌNH HUỐNG: Không có đủ dữ liệu trong hệ thống để trả lời chính xác.
+        TÌNH HUỐNG: Không có đủ dữ liệu trong hệ thống để trả lời chính xác câu hỏi về sản phẩm/chính sách VBSP
 
         Câu hỏi: "{question}"
 
