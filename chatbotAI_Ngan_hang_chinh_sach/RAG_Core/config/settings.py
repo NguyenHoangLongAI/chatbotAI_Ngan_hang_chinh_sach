@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     # ===== Milvus =====
     MILVUS_HOST: str = "milvus"
     MILVUS_PORT: str = "19530"
-    DOCUMENT_COLLECTION: str = "document_embeddings"
+    DOCUMENT_COLLECTION: str = "document_chunks"
     FAQ_COLLECTION: str = "faq_embeddings"
     DOCUMENT_URLS_COLLECTION: str = "document_urls"  # NEW
 
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
 
     # Maximum URLs to show in footer
     MAX_REFERENCE_URLS: int = 5
-    COHERE_API_KEY: str = 
+    COHERE_API_KEY: str = "e756puaI9nSZlT967qamaJ7eUdeXh2neu8dy6lGF"
     # ===== Contact =====
     SUPPORT_PHONE: str = "Phòng vận hành 0904540490 - Phòng kinh doanh:0914616081"
 
