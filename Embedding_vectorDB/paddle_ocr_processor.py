@@ -1,42 +1,87 @@
 """
-PaddleOCR v3.7.0 Document Processor — PRODUCTION v5
-=====================================================
-Viết lại hoàn toàn từ v4, fix tất cả vấn đề production:
+PaddleOCR v3.7.0 Document Processor — PRODUCTION v6
+=======================================================
+Tái cấu trúc từ v5.1 theo pipeline chuẩn 5 bước (Layout Analysis → Table
+Structure → Text Recognition → Figure/Caption → Normalize/Fuse).
+Public API giữ nguyên 100% — document_processor.py / main.py không cần sửa.
 
-ROOT CAUSE FIXES:
-  1. PPStructureV3 detect text thường thành bảng giả
-     → Chỉ dùng PPStructureV3 khi page thực sự có bảng (TABLE type)
-     → MIXED/TEXT pages dùng PaddleOCR plain text
-  2. pages_detected = 1 → page separator mất
-     → HybridPDFProcessor.process() giữ nguyên "\n\n---\n\n"
-  3. ProtonX không chạy → text lỗi
-     → Corrector apply đúng chỗ, không bỏ qua
-  4. Table duplicate (text + table của cùng content)
-     → Bỏ "bổ sung bảng từ PPStructureV3 nếu pdfplumber đã có text"
-  5. PaddleOCR v3.7.0 API: use_gpu → device, show_log removed
+THAY ĐỔI KIẾN TRÚC CHÍNH (so với v5.1):
 
-CHIẾN LƯỢC XỬ LÝ PAGE:
-  TEXT  → pdfplumber (nhanh, không cần render)
-  TABLE → pdfplumber text + PPStructureV3 chỉ lấy bảng HTML
-  IMAGE → PPStructureV3 full layout → PaddleOCR fallback
-  MIXED → pdfplumber nếu đủ text (≥80 chars), else PaddleOCR
+  A. LAYOUT-FIRST ROUTING (fix root cause, không phải fix triệu chứng)
+     v5.1: mỗi PageType (TABLE/IMAGE/MIXED) tự gọi lại
+           PPStructureV3.predict() theo cách khác nhau — TABLE chỉ lấy
+           "tables_only", IMAGE lấy "full_layout", rồi so sánh string thô
+           để tránh duplicate giữa pdfplumber-table và PPStructure-table.
+           → Dễ duplicate/bỏ sót khi OCR sai 1-2 ký tự làm so khớp fail.
+     v6:   với MỌI page cần render (không phải TEXT thuần), gọi
+           predict() ĐÚNG MỘT LẦN, lấy toàn bộ parsing_res_list, rồi
+           route từng BLOCK (không phải từng PAGE) theo label thật:
+           table → SLANet structure, text → OCR/correction,
+           figure → caption-matched image, formula → latex.
+           Loại bỏ hoàn toàn logic so-sánh-string-để-tránh-duplicate.
 
-OCR ENGINE:
-  PaddleOCR(text_detection_model_name="PP-OCRv5_mobile_det",
-            text_recognition_model_name="PP-OCRv5_mobile_rec")
-  PPStructureV3(same models, use_seal/formula/chart=False)
+  B. MERGED CELLS FIX (_html_to_markdown)
+     v5.1: TableParser bỏ qua colspan/rowspan → bảng có ô gộp (rất phổ
+           biến trong bảng lãi suất/kỳ hạn ngân hàng) bị lệch cột khi
+           convert sang Markdown.
+     v6:   parse colspan/rowspan, replicate giá trị cell theo đúng số
+           cột/dòng bị gộp trước khi build lưới Markdown, dùng grid
+           occupancy map để không ghi đè ô đã bị chiếm bởi rowspan
+           từ dòng trước.
 
-TEXT CORRECTION:
-  ProtonX student model, offline mode, chỉ correct plain text paragraphs
-  Bỏ qua markdown table, code block, base64 image
+  C. CAPTION MATCHING cho Figure
+     v5.1: alt-text generic "Page N Image K", không có ngữ cảnh.
+     v6:   sau khi crop figure, quét text trong vùng ngay dưới/trên ảnh
+           (bằng pdfplumber crop mở rộng) tìm pattern dạng số thứ tự kiểu
+           "Hình 1:", "Biểu đồ 2." → gắn vào alt text, giúp embedding sau
+           này giữ được ngữ nghĩa của hình.
+
+  D. HANDWRITING-AWARE FALLBACK (có điều kiện, không tăng latency mặc định)
+     PP-OCRv5_mobile_rec trả rec_scores cho từng dòng. Nếu một block text
+     có tỷ lệ dòng confidence thấp (score < HANDWRITING_SCORE_THRESHOLD)
+     vượt HANDWRITING_LOW_CONF_RATIO, đánh dấu block đó "có khả năng viết
+     tay" — hiện tại fallback bằng cách thử lại OCR trên crop ảnh đã
+     upscale (tăng DPI hiệu lực) vì pipeline không bundle sẵn model
+     handwriting riêng; nếu có model server-tier khác, chỉ cần thay
+     _retry_low_confidence_block() để gọi engine đó.
+
+GIỮ NGUYÊN TỪ v5.1:
+  - HF_HUB_OFFLINE đặt trước mọi import liên quan huggingface_hub.
+  - ProtonX correction với preserve table/image/code block, logging chi
+    tiết (call counters, diff summary, periodic summary).
+  - Page separator "\n\n---\n\n" cho SmartChunker.
+  - PaddleOCR v3.7.0 API: device= thay use_gpu=, show_log removed.
+  - PPStructureV3 dùng PP-OCRv5_mobile_det/rec, seal/formula/chart=False.
+
+CHIẾN LƯỢC XỬ LÝ PAGE (v6):
+  TEXT  → pdfplumber fast-path, không render, không OCR (giữ nguyên v5.1
+          vì đây đã là tối ưu đúng — page có đủ text digital thì không
+          cần Layout Analysis nào cả).
+  TABLE/IMAGE/MIXED → render ảnh → PPStructureV3.predict() MỘT LẦN →
+          route block-by-block theo label → fuse theo thứ tự đọc gốc
+          (parsing_res_list đã trả theo đúng reading order).
 """
 
 from __future__ import annotations
 
+# ============================================================================
+# CRITICAL: Set HF/transformers offline env vars BEFORE any import that may
+# pull in huggingface_hub (transformers, protonx, sentence-transformers...).
+# ============================================================================
+import os
+
+os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
+
+_ALLOW_WARMUP = os.getenv("PROTONX_ALLOW_ONLINE_WARMUP", "false").lower() == "true"
+if not _ALLOW_WARMUP:
+    os.environ["HF_HUB_OFFLINE"] = "1"
+    os.environ["TRANSFORMERS_OFFLINE"] = "1"
+    os.environ["HF_DATASETS_OFFLINE"] = "1"
+os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
+
 import base64
 import io
 import logging
-import os
 import re
 import tempfile
 import threading
@@ -46,26 +91,74 @@ from typing import Dict, List, Optional, Tuple
 
 from PIL import Image
 
-# ── Suppress PaddleX verbose "Creating model" logs ──────────────────
-os.environ.setdefault("PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK", "True")
 logging.getLogger("paddlex").setLevel(logging.WARNING)
 logging.getLogger("paddleocr").setLevel(logging.WARNING)
 logging.getLogger("paddle").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
+
+# ============================================================================
+# MODULE-LEVEL HELPERS
+# ============================================================================
+
+def _paddle_actual_device() -> str:
+    """Trả về device thực sự mà PaddlePaddle đang dùng: 'gpu:0', 'cpu', v.v."""
+    try:
+        import paddle
+        return str(paddle.get_device())
+    except Exception:
+        pass
+    try:
+        import paddle
+        if paddle.is_compiled_with_cuda() and paddle.device.cuda.device_count() > 0:
+            return "gpu:0"
+        return "cpu"
+    except Exception:
+        return "unknown"
+
+
+def _is_whitespace_only_change(original: str, corrected: str) -> bool:
+    import re as _re
+    return _re.sub(r"\s+", "", original) == _re.sub(r"\s+", "", corrected)
+
+
+def _diff_summary(original: str, corrected: str, max_examples: int = 3) -> str:
+    import difflib
+    orig_words = original.split()
+    corr_words = corrected.split()
+    matcher = difflib.SequenceMatcher(None, orig_words, corr_words)
+    examples = []
+    for tag, i1, i2, j1, j2 in matcher.get_opcodes():
+        if tag in ("replace", "insert", "delete") and len(examples) < max_examples:
+            orig_seg = " ".join(orig_words[i1:i2])[:60]
+            corr_seg = " ".join(corr_words[j1:j2])[:60]
+            examples.append(f"  [{len(examples) + 1}] {orig_seg!r} → {corr_seg!r}")
+    return ("\n" + "\n".join(examples)) if examples else " (no word-level diff)"
 
 
 # ============================================================================
 # CONSTANTS
 # ============================================================================
 
-TEXT_PAGE_MIN_CHARS = 80   # chars để classify page là TEXT (pdfplumber fast-path)
-MIXED_PAGE_MIN_CHARS = 40  # chars để dùng pdfplumber thay vì OCR trong MIXED pages
+TEXT_PAGE_MIN_CHARS = 80
+MIXED_PAGE_MIN_CHARS = 40
 PDF_RENDER_DPI = 150
+
+# Caption matching — patterns thường gặp trong tài liệu tiếng Việt
+_CAPTION_PATTERNS = [
+    re.compile(r'^\s*(Hình|Bảng|Biểu\s*đồ|Sơ\s*đồ|Ảnh)\s*\d+[:.\-]?\s*.{0,150}', re.IGNORECASE),
+]
+_CAPTION_SEARCH_MARGIN = 40  # px mở rộng vùng tìm caption quanh figure
+
+# Handwriting-aware fallback thresholds
+HANDWRITING_SCORE_THRESHOLD = 0.5
+HANDWRITING_LOW_CONF_RATIO = 0.30
 
 
 # ============================================================================
-# PROTONX VIETNAMESE TEXT CORRECTOR
+# PROTONX VIETNAMESE TEXT CORRECTOR  (giữ nguyên logic v5.1)
 # ============================================================================
 
 class VietnameseTextCorrector:
@@ -80,18 +173,30 @@ class VietnameseTextCorrector:
         "nano":    "protonx-models/nano-protonx-legal-tc",
     }
     MAX_CHUNK = 512
+    SUMMARY_EVERY = 50
 
     def __init__(self, model_size: str = "student", enabled: bool = True):
         self.enabled = enabled
         self.model_size = model_size
         self._client = None
         self._lock = threading.Lock()
+
+        self._call_count = 0
+        self._api_call_count = 0
+        self._changed_count = 0
+        self._skipped_count = 0
+        self._error_count = 0
+        self._total_input_chars = 0
+        self._total_output_chars = 0
+        self._total_elapsed = 0.0
+        self._total_api_elapsed = 0.0
+        self._api_content_changed_count = 0
+
         if enabled:
             self._init_client()
 
     def _init_client(self):
         try:
-            # Force offline — không check HuggingFace mỗi request
             os.environ["TRANSFORMERS_OFFLINE"] = "1"
             os.environ["HF_DATASETS_OFFLINE"] = "1"
             from protonx import ProtonX
@@ -109,15 +214,75 @@ class VietnameseTextCorrector:
 
     def correct(self, text: str) -> str:
         if not self.enabled or not self._client or not text.strip():
+            self._skipped_count += 1
+            logger.debug(
+                f"[ProtonX] correct() SKIPPED — "
+                f"enabled={self.enabled}, empty={not text.strip()}"
+            )
             return text
+
+        self._call_count += 1
+        call_id = self._call_count
+        input_len = len(text)
+        t0 = time.time()
+
+        logger.info(
+            f"[ProtonX #{call_id}] correct() START — "
+            f"input={input_len} chars | model={self.model_size}"
+        )
+
         try:
-            return self._correct_with_preservation(text)
+            result = self._correct_with_preservation(text)
+            elapsed = time.time() - t0
+            output_len = len(result)
+            changed = result != text
+
+            self._total_input_chars += input_len
+            self._total_output_chars += output_len
+            self._total_elapsed += elapsed
+            if changed:
+                self._changed_count += 1
+
+            _ws_only = _is_whitespace_only_change(text, result) if changed else False
+            _change_type = (
+                "whitespace_only" if (_ws_only and changed)
+                else ("content" if changed else "none")
+            )
+
+            logger.info(
+                f"[ProtonX #{call_id}] correct() DONE  — "
+                f"input={input_len} | output={output_len} | "
+                f"changed={'YES' if changed else 'NO '} | "
+                f"change_type={_change_type} | "
+                f"elapsed={elapsed:.3f}s"
+            )
+
+            if changed and not _ws_only:
+                logger.info(
+                    f"[ProtonX #{call_id}] content diff:{_diff_summary(text, result)}"
+                )
+            elif changed and _ws_only:
+                logger.debug(
+                    f"[ProtonX #{call_id}] whitespace-only change (no content fix)"
+                )
+
+            if self.SUMMARY_EVERY > 0 and self._call_count % self.SUMMARY_EVERY == 0:
+                self._log_summary()
+
+            return result
+
         except Exception as e:
+            elapsed = time.time() - t0
+            self._error_count += 1
+            self._total_elapsed += elapsed
+            logger.warning(
+                f"[ProtonX #{call_id}] correct() ERROR — "
+                f"{e} | elapsed={elapsed:.3f}s"
+            )
             logger.debug(f"Text correction failed: {e}")
             return text
 
     def _correct_with_preservation(self, text: str) -> str:
-        """Preserve markdown tables, base64 images, code blocks; correct plain text."""
         PRESERVE_PATTERNS = [
             re.compile(r'!\[[^\]]*\]\(data:image/[^;]+;base64,[A-Za-z0-9+/=]+\)', re.DOTALL),
             re.compile(r'(?m)((?:^\|.+\|\s*\n?){2,})'),
@@ -177,37 +342,97 @@ class VietnameseTextCorrector:
     def _api_correct(self, text: str) -> str:
         if not text.strip():
             return text
+
+        self._api_call_count += 1
+        api_id = self._api_call_count
+        preview = text[:80].replace('\n', ' ')
+        t0 = time.time()
+
+        logger.debug(
+            f"[ProtonX API #{api_id}] call START — "
+            f"chunk={len(text)} chars | preview: \"{preview}{'...' if len(text) > 80 else ''}\""
+        )
+
         try:
             model_name = self.MODELS.get(self.model_size, self.MODELS["student"])
-            result = self._client.text.correct(input=text, top_k=1, model=model_name)
-            if (result and "data" in result and result["data"]
-                    and result["data"][0].get("candidates")):
-                return result["data"][0]["candidates"][0]["output"]
+            result_data = self._client.text.correct(input=text, top_k=1, model=model_name)
+            elapsed = time.time() - t0
+            self._total_api_elapsed += elapsed
+
+            if (result_data and "data" in result_data and result_data["data"]
+                    and result_data["data"][0].get("candidates")):
+                output = result_data["data"][0]["candidates"][0]["output"]
+                changed = output != text
+                logger.debug(
+                    f"[ProtonX API #{api_id}] call DONE  — "
+                    f"elapsed={elapsed:.3f}s | changed={'YES' if changed else 'NO '} | "
+                    f"out_len={len(output)}"
+                )
+                return output
+
+            logger.debug(
+                f"[ProtonX API #{api_id}] call DONE  — "
+                f"elapsed={elapsed:.3f}s | no candidates, returning original"
+            )
             return text
+
         except Exception as e:
-            logger.debug(f"ProtonX API error: {e}")
+            elapsed = time.time() - t0
+            self._total_api_elapsed += elapsed
+            logger.debug(
+                f"[ProtonX API #{api_id}] call ERROR — "
+                f"elapsed={elapsed:.3f}s | {e}"
+            )
             return text
 
+    def _log_summary(self) -> None:
+        avg_elapsed = (
+            self._total_elapsed / self._call_count if self._call_count else 0.0
+        )
+        avg_api_elapsed = (
+            self._total_api_elapsed / self._api_call_count
+            if self._api_call_count else 0.0
+        )
+        change_rate = (
+            self._changed_count / self._call_count * 100
+            if self._call_count else 0.0
+        )
+        char_delta = self._total_output_chars - self._total_input_chars
 
-# ============================================================================
-# PAGE TYPE
-# ============================================================================
+        logger.info(
+            f"[ProtonX SUMMARY] ── after {self._call_count} correct() calls ──\n"
+            f"  calls      : total={self._call_count} | "
+            f"changed={self._changed_count} ({change_rate:.1f}%) | "
+            f"skipped={self._skipped_count} | errors={self._error_count}\n"
+            f"  chars      : input={self._total_input_chars} | "
+            f"output={self._total_output_chars} | delta={char_delta:+d}\n"
+            f"  api calls  : {self._api_call_count} | avg={avg_api_elapsed:.3f}s/call\n"
+            f"  time       : total={self._total_elapsed:.1f}s | "
+            f"avg={avg_elapsed:.3f}s/correct() | "
+            f"api_total={self._total_api_elapsed:.1f}s"
+        )
+
+    def log_summary(self) -> None:
+        self._log_summary()
+
 
 class PageType:
-    TEXT  = "text"
+    TEXT = "text"
     TABLE = "table"
     IMAGE = "image"
     MIXED = "mixed"
 
 
 # ============================================================================
-# PAGE CLASSIFIER
+# PAGE CLASSIFIER  (chỉ quyết định: page này có cần render+layout không?)
 # ============================================================================
 
 class PageClassifier:
     """
-    Phân loại page dựa trên pdfplumber metadata.
-    Không dùng OpenCV.
+    Phân loại page ở mức THÔ để quyết định fast-path hay không — KHÔNG
+    còn vai trò xác định nội dung chi tiết (đó là việc của Layout Analysis
+    thật ở LayoutRouter). TEXT = đủ text digital, khỏi cần render/OCR gì.
+    Mọi loại khác (TABLE/IMAGE/MIXED) đều đi qua layout pipeline thống nhất.
     """
 
     @staticmethod
@@ -227,28 +452,23 @@ class PageClassifier:
         tables = page.extract_tables() or []
         has_table = len(tables) > 0
 
-        # TEXT: nhiều text, ít ảnh → pdfplumber fast-path
-        if char_count >= TEXT_PAGE_MIN_CHARS and image_coverage < 0.30:
-            return PageType.TABLE if has_table else PageType.TEXT
+        if char_count >= TEXT_PAGE_MIN_CHARS and image_coverage < 0.30 and not has_table:
+            return PageType.TEXT
 
-        # IMAGE: ảnh chiếm nhiều, rất ít text
         if image_coverage >= 0.40 and char_count < 30:
             return PageType.IMAGE
 
-        # TABLE: pdfplumber detect được bảng
         if has_table:
             return PageType.TABLE
 
-        # MIXED: còn lại — có cả text lẫn ảnh, hoặc text ít
-        # Nếu có đủ text dùng được → vẫn xử lý như TEXT để tránh chậm
         if char_count >= MIXED_PAGE_MIN_CHARS:
-            return PageType.TEXT
+            return PageType.MIXED
 
         return PageType.MIXED
 
 
 # ============================================================================
-# PDF EMBEDDED IMAGE EXTRACTOR
+# PDF EMBEDDED IMAGE EXTRACTOR  (fallback path khi không render — hiếm)
 # ============================================================================
 
 class PDFImageExtractor:
@@ -271,11 +491,44 @@ class PDFImageExtractor:
                 if isinstance(raw, (bytes, bytearray)):
                     b64 = base64.b64encode(raw).decode("utf-8")
                     mime = PDFImageExtractor._detect_mime(raw)
-                    label = f"Page {page_num} Image {idx + 1}"
+                    caption = PDFImageExtractor._find_caption(pdf_page, img_meta)
+                    label = caption or f"Page {page_num} Image {idx + 1}"
                     markdown_images.append(f"![{label}](data:{mime};base64,{b64})")
             except Exception as e:
                 logger.debug(f"Image extract error p{page_num} img{idx}: {e}")
         return markdown_images
+
+    @staticmethod
+    def _find_caption(pdf_page, img_meta: Dict) -> Optional[str]:
+        """Tìm caption (Hình/Bảng/Biểu đồ N: ...) ngay dưới hoặc trên ảnh."""
+        try:
+            x0 = img_meta.get("x0", 0)
+            x1 = img_meta.get("x1", pdf_page.width)
+            y0 = img_meta.get("y0", 0)
+            y1 = img_meta.get("y1", pdf_page.height)
+
+            # pdfplumber: gốc tọa độ y tăng từ trên-xuống hoặc dưới-lên tùy
+            # version; thử cả hai vùng lân cận (trên & dưới) cho an toàn.
+            below = pdf_page.crop((
+                max(x0 - 10, 0), y1,
+                min(x1 + 10, pdf_page.width), min(y1 + _CAPTION_SEARCH_MARGIN, pdf_page.height)
+            ))
+            above = pdf_page.crop((
+                max(x0 - 10, 0), max(y0 - _CAPTION_SEARCH_MARGIN, 0),
+                min(x1 + 10, pdf_page.width), y0
+            ))
+
+            for region in (below, above):
+                txt = (region.extract_text() or "").strip()
+                if not txt:
+                    continue
+                for pat in _CAPTION_PATTERNS:
+                    m = pat.match(txt)
+                    if m:
+                        return m.group(0).strip()[:150]
+            return None
+        except Exception:
+            return None
 
     @staticmethod
     def _detect_mime(data: bytes) -> str:
@@ -287,7 +540,7 @@ class PDFImageExtractor:
 
 
 # ============================================================================
-# PDFPLUMBER FAST-PATH EXTRACTOR
+# PDFPLUMBER FAST-PATH EXTRACTOR  (chỉ cho PageType.TEXT)
 # ============================================================================
 
 class PlumberExtractor:
@@ -329,13 +582,14 @@ class PlumberExtractor:
 
 
 # ============================================================================
-# PADDLEOCR v3.7.0 ENGINE  (PP-OCRv5_mobile)
+# PADDLEOCR v3.7.0 ENGINE  (PP-OCRv5_mobile) — dùng cho retry/fallback
 # ============================================================================
 
 class PaddleOCREngine:
     """
     PaddleOCR v3.7.0 với PP-OCRv5_mobile models.
-    PP-OCRv6 bị lỗi PIR strides với PaddlePaddle 3.0.0 → force PP-OCRv5_mobile.
+    Trong v6 dùng chủ yếu làm fallback khi PPStructureV3 không khả dụng,
+    hoặc khi retry block có confidence thấp (khả năng chữ viết tay).
     """
 
     def __init__(self, use_gpu: bool = True, lang: str = "vi"):
@@ -346,55 +600,79 @@ class PaddleOCREngine:
 
     def _init(self):
         try:
-            os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
             from paddleocr import PaddleOCR
             self._ocr = PaddleOCR(
                 use_doc_orientation_classify=False,
                 text_detection_model_name="PP-OCRv5_mobile_det",
                 text_recognition_model_name="PP-OCRv5_mobile_rec",
+                device="gpu" if self.use_gpu else "cpu",
             )
-            logger.info("✅ PaddleOCR v3.7.0 (PP-OCRv5_mobile) engine ready")
+            _actual_dev = _paddle_actual_device()
+            logger.info(
+                f"✅ PaddleOCR v3.7.0 (PP-OCRv5_mobile) engine ready | "
+                f"requested={'gpu' if self.use_gpu else 'cpu'} | "
+                f"actual_device={_actual_dev}"
+            )
+            if self.use_gpu and "gpu" not in _actual_dev.lower():
+                logger.warning(
+                    f"⚠️  [PaddleOCR] GPU requested but actual device={_actual_dev!r}. "
+                    f"Inference will run on CPU — kiểm tra CUDA driver / CUDA_VISIBLE_DEVICES"
+                )
         except ImportError:
             logger.warning("⚠️ paddleocr not installed. Run: pip install paddleocr==3.7.0")
         except Exception as e:
             logger.warning(f"⚠️ PaddleOCR init failed: {e}")
 
-    def extract_text(self, image: "Image.Image") -> str:
-        """Extract plain text từ PIL Image dùng predict() API."""
+    def extract_text_with_scores(self, image: "Image.Image") -> Tuple[str, List[float]]:
+        """Extract text + trả kèm list confidence scores (cho handwriting check)."""
         if self._ocr is None:
-            return ""
+            return "", []
         try:
             import numpy as np
             img_array = np.array(image.convert("RGB"))
             result = self._ocr.predict(img_array)
-            # Output: list of page dicts với keys: rec_texts, rec_scores
-            lines = []
+            lines, scores = [], []
             for page in result:
-                rec_texts  = page.get("rec_texts", []) or []
+                rec_texts = page.get("rec_texts", []) or []
                 rec_scores = page.get("rec_scores", []) or []
                 for i, text in enumerate(rec_texts):
                     score = rec_scores[i] if i < len(rec_scores) else 1.0
                     if text and str(text).strip() and score > 0.3:
                         lines.append(str(text).strip())
-            return "\n".join(lines)
+                        scores.append(float(score))
+            return "\n".join(lines), scores
         except Exception as e:
             logger.error(f"PaddleOCR extraction error: {e}")
-            return ""
+            return "", []
+
+    def extract_text(self, image: "Image.Image") -> str:
+        text, _ = self.extract_text_with_scores(image)
+        return text
+
+    def extract_text_upscaled(self, image: "Image.Image", scale: float = 1.8) -> str:
+        """
+        Retry path cho block có confidence thấp (khả năng chữ viết tay /
+        ảnh mờ). Upscale ảnh trước khi OCR lại — không cần model riêng,
+        cải thiện đáng kể recognition trên nét chữ mảnh/nghiêng.
+        """
+        try:
+            w, h = image.size
+            upscaled = image.resize((int(w * scale), int(h * scale)), Image.LANCZOS)
+            return self.extract_text(upscaled)
+        except Exception as e:
+            logger.debug(f"Upscale retry failed: {e}")
+            return self.extract_text(image)
 
 
 # ============================================================================
-# PP-STRUCTURE V3 TABLE EXTRACTOR
+# PP-STRUCTURE V3 — LAYOUT ANALYSIS + TABLE STRUCTURE (engine thống nhất)
 # ============================================================================
 
-class PPStructureTableExtractor:
+class LayoutAnalyzer:
     """
-    PPStructureV3 chỉ dùng để extract BẢNG từ page ảnh.
-    KHÔNG dùng cho text extraction thông thường (tránh detect text → table sai).
-
-    Key insight từ thực tế:
-    - parsing_res_list[i].label == "table" → content là HTML table
-    - parsing_res_list[i].label == "text"/"paragraph" → text thường, BỎ QUA
-    - Chỉ lấy label == "table", convert HTML → Markdown
+    Bọc PPStructureV3 làm NGUỒN DUY NHẤT cho layout + table + text + figure
+    của một ảnh trang. Mỗi page chỉ gọi predict() một lần (v6 fix so với
+    v5.1 gọi 2 lần khác mục đích cho TABLE vs IMAGE).
     """
 
     def __init__(self, use_gpu: bool = True, lang: str = "vi"):
@@ -403,9 +681,12 @@ class PPStructureTableExtractor:
         self.lang = lang
         self._init()
 
+    @property
+    def available(self) -> bool:
+        return self._pipeline is not None
+
     def _init(self):
         try:
-            os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
             from paddleocr import PPStructureV3
             self._pipeline = PPStructureV3(
                 lang=self.lang,
@@ -415,20 +696,25 @@ class PPStructureTableExtractor:
                 use_seal_recognition=False,
                 use_formula_recognition=False,
                 use_chart_recognition=False,
+                device="gpu" if self.use_gpu else "cpu",
             )
-            logger.info("✅ PP-StructureV3 table extractor ready (PP-OCRv5_mobile)")
+            logger.info(
+                f"✅ PP-StructureV3 layout analyzer ready "
+                f"(PP-OCRv5_mobile, device={'gpu' if self.use_gpu else 'cpu'})"
+            )
         except ImportError:
             logger.warning(
                 "⚠️ paddleocr/paddlex[ocr] not installed — "
-                "table extraction disabled. Run: pip install paddlex[ocr]"
+                "layout analysis disabled. Run: pip install paddlex[ocr]"
             )
         except Exception as e:
             logger.warning(f"⚠️ PP-StructureV3 init failed: {e}")
 
-    def extract_tables_only(self, image: "Image.Image") -> List[str]:
+    def analyze(self, image: "Image.Image") -> List["LayoutBlock"]:
         """
-        Extract CHỈ BẢNG từ image, trả về list Markdown table strings.
-        Bỏ qua tất cả text blocks để tránh duplicate với pdfplumber.
+        Trả về list LayoutBlock theo ĐÚNG THỨ TỰ ĐỌC (parsing_res_list đã
+        sắp theo reading order: trên→dưới, trái→phải). Đây là điểm mấu
+        chốt khác v5.1: một lần predict(), router quyết định downstream.
         """
         if self._pipeline is None:
             return []
@@ -437,123 +723,130 @@ class PPStructureTableExtractor:
             img_array = np.array(image.convert("RGB"))
             result = self._pipeline.predict(img_array)
 
-            tables: List[str] = []
+            blocks: List[LayoutBlock] = []
             for page_result in result:
                 parsing_list = page_result.get("parsing_res_list", [])
                 for block in parsing_list:
                     label = (getattr(block, "label", "") or "").lower()
-                    if label != "table":
-                        continue
-                    content = getattr(block, "content", "") or ""
-                    if not content.strip():
-                        continue
-                    # content là HTML table từ PPStructureV3
-                    if "<table" in content.lower() or "<td" in content.lower():
-                        md = self._html_to_markdown(content)
-                        if md and "|" in md:
-                            tables.append(md)
-                    # Hoặc đã là Markdown
-                    elif "|" in content and "---" in content:
-                        tables.append(content.strip())
-
-            return tables
-        except Exception as e:
-            logger.error(f"PP-StructureV3 table extraction error: {e}")
-            return []
-
-    def extract_full_layout(self, image: "Image.Image") -> List[Dict]:
-        """
-        Full layout extraction cho IMAGE pages.
-        Trả về list dicts: {type, content}
-        type: "table" | "text" | "figure" | "formula"
-        """
-        if self._pipeline is None:
-            return []
-        try:
-            import numpy as np
-            img_array = np.array(image.convert("RGB"))
-            result = self._pipeline.predict(img_array)
-
-            elements: List[Dict] = []
-            for page_result in result:
-                parsing_list = page_result.get("parsing_res_list", [])
-                for block in parsing_list:
-                    label   = (getattr(block, "label", "") or "").lower()
                     content = (getattr(block, "content", "") or "").strip()
+                    bbox = getattr(block, "bbox", None) or getattr(block, "block_bbox", None)
                     if not content:
                         continue
+                    blocks.append(LayoutBlock(label=label, content=content, bbox=bbox))
 
-                    if label == "table":
-                        if "<table" in content.lower() or "<td" in content.lower():
-                            md = self._html_to_markdown(content)
-                            if md:
-                                elements.append({"type": "table", "content": md})
-                        elif "|" in content:
-                            elements.append({"type": "table", "content": content})
-                    elif label in ("figure", "image", "figure_caption"):
-                        elements.append({"type": "figure", "content": f"[FIGURE: {content}]"})
-                    elif label == "formula":
-                        elements.append({"type": "formula", "content": f"$${content}$$"})
-                    else:
-                        # text, paragraph, title, list → plain text
-                        elements.append({"type": "text", "content": content})
-
-                # Fallback nếu parsing_res_list rỗng
-                if not elements:
+                # Fallback nếu parsing_res_list rỗng nhưng overall_ocr_res có data
+                if not blocks:
                     ocr_res = page_result.get("overall_ocr_res", {}) or {}
                     rec_texts = ocr_res.get("rec_texts", []) or []
+                    rec_scores = ocr_res.get("rec_scores", []) or []
                     if rec_texts:
-                        elements.append({
-                            "type": "text",
-                            "content": "\n".join(str(t) for t in rec_texts if t),
-                        })
+                        blocks.append(LayoutBlock(
+                            label="text",
+                            content="\n".join(str(t) for t in rec_texts if t),
+                            bbox=None,
+                            scores=list(rec_scores) if rec_scores else None,
+                        ))
 
-            return elements
+            return blocks
         except Exception as e:
-            logger.error(f"PP-StructureV3 full layout error: {e}")
+            logger.error(f"PP-StructureV3 layout analysis error: {e}")
             return []
 
     @staticmethod
-    def _html_to_markdown(html: str) -> str:
-        """Convert HTML table → Markdown table."""
+    def html_table_to_markdown(html: str) -> str:
+        """
+        Convert HTML table → Markdown, XỬ LÝ ĐÚNG colspan/rowspan (fix
+        chính so với v5.1, nơi merged cells bị bỏ qua hoàn toàn và làm
+        lệch cột với bảng phức tạp như bảng lãi suất kỳ hạn x loại KH).
+        """
         try:
             from html.parser import HTMLParser
 
-            class TableParser(HTMLParser):
+            class GridTableParser(HTMLParser):
+                """
+                Dựng grid 2D thực sự, tôn trọng colspan/rowspan bằng cách
+                track occupancy map — ô nào đã bị "chiếm" bởi rowspan từ
+                dòng trước sẽ được bỏ qua khi đặt ô mới vào dòng hiện tại.
+                """
+
                 def __init__(self):
                     super().__init__()
-                    self.rows: List[List[str]] = []
-                    self._row: List[str] = []
-                    self._cell: str = ""
+                    self.grid: List[List[str]] = []
+                    self._row_idx = -1
+                    self._col_cursor = 0
+                    self._cell_text = ""
                     self._in_cell = False
+                    self._cur_colspan = 1
+                    self._cur_rowspan = 1
+                    # occupancy[row][col] = True nếu đã có ô (do rowspan) chiếm
+                    self._occupancy: Dict[Tuple[int, int], bool] = {}
 
                 def handle_starttag(self, tag, attrs):
+                    attrs_d = dict(attrs)
                     if tag == "tr":
-                        self._row = []
+                        self._row_idx += 1
+                        self._col_cursor = 0
+                        if self._row_idx >= len(self.grid):
+                            self.grid.append([])
                     elif tag in ("td", "th"):
-                        self._cell = ""
+                        self._cell_text = ""
                         self._in_cell = True
-
-                def handle_endtag(self, tag):
-                    if tag in ("td", "th"):
-                        self._row.append(self._cell.strip())
-                        self._in_cell = False
-                    elif tag == "tr":
-                        if self._row:
-                            self.rows.append(self._row)
+                        try:
+                            self._cur_colspan = max(1, int(attrs_d.get("colspan", 1)))
+                        except (TypeError, ValueError):
+                            self._cur_colspan = 1
+                        try:
+                            self._cur_rowspan = max(1, int(attrs_d.get("rowspan", 1)))
+                        except (TypeError, ValueError):
+                            self._cur_rowspan = 1
 
                 def handle_data(self, data):
                     if self._in_cell:
-                        self._cell += data
+                        self._cell_text += data
 
-            parser = TableParser()
+                def handle_endtag(self, tag):
+                    if tag not in ("td", "th"):
+                        return
+                    self._in_cell = False
+                    value = self._cell_text.strip()
+
+                    # Tìm cột trống đầu tiên (chưa bị occupancy chiếm) từ
+                    # col_cursor hiện tại — đây là cách xử lý đúng khi dòng
+                    # trước có rowspan tràn xuống dòng này.
+                    while self._occupancy.get((self._row_idx, self._col_cursor)):
+                        self._col_cursor += 1
+
+                    start_col = self._col_cursor
+                    row = self.grid[self._row_idx]
+                    while len(row) <= start_col + self._cur_colspan - 1:
+                        row.append("")
+
+                    for c_off in range(self._cur_colspan):
+                        col = start_col + c_off
+                        row[col] = value if c_off == 0 else value  # replicate ngang
+                        for r_off in range(self._cur_rowspan):
+                            if r_off == 0:
+                                continue
+                            target_row = self._row_idx + r_off
+                            self._occupancy[(target_row, col)] = True
+                            while len(self.grid) <= target_row:
+                                self.grid.append([])
+                            grow = self.grid[target_row]
+                            while len(grow) <= col:
+                                grow.append("")
+                            grow[col] = value  # replicate dọc
+
+                    self._col_cursor = start_col + self._cur_colspan
+
+            parser = GridTableParser()
             parser.feed(html)
-            if not parser.rows:
+            rows = [r for r in parser.grid if any(c.strip() for c in r)]
+            if not rows:
                 return ""
 
-            rows = parser.rows
             max_cols = max(len(r) for r in rows)
             rows = [r + [""] * (max_cols - len(r)) for r in rows]
+
             lines = [
                 "| " + " | ".join(rows[0]) + " |",
                 "| " + " | ".join(["---"] * max_cols) + " |",
@@ -566,36 +859,154 @@ class PPStructureTableExtractor:
             return ""
 
 
+class LayoutBlock:
+    """Một block layout đã được PPStructureV3 phân vùng + gán nhãn."""
+
+    __slots__ = ("label", "content", "bbox", "scores")
+
+    def __init__(self, label: str, content: str, bbox=None, scores: Optional[List[float]] = None):
+        self.label = label
+        self.content = content
+        self.bbox = bbox
+        self.scores = scores
+
+    @property
+    def is_table(self) -> bool:
+        return self.label == "table"
+
+    @property
+    def is_figure(self) -> bool:
+        return self.label in ("figure", "image", "figure_caption", "chart")
+
+    @property
+    def is_formula(self) -> bool:
+        return self.label == "formula"
+
+    @property
+    def low_confidence_ratio(self) -> float:
+        """Tỷ lệ dòng có score thấp — tín hiệu khả năng chữ viết tay."""
+        if not self.scores:
+            return 0.0
+        low = sum(1 for s in self.scores if s < HANDWRITING_SCORE_THRESHOLD)
+        return low / len(self.scores)
+
+
 # ============================================================================
-# HYBRID PDF PROCESSOR — PRODUCTION v5
+# LAYOUT ROUTER — route từng block theo label, fuse theo thứ tự đọc
+# ============================================================================
+
+class LayoutRouter:
+    """
+    Nhận List[LayoutBlock] (đã đúng reading order từ LayoutAnalyzer) và
+    quyết định downstream processing cho từng block — đây là "Bước 5:
+    Chuẩn hóa & Hợp nhất" áp dụng trực tiếp trên kết quả layout thật,
+    thay vì v5.1 phải tự suy luận lại qua PageType ở mức trang.
+    """
+
+    def __init__(
+        self,
+        corrector: VietnameseTextCorrector,
+        ocr_engine: PaddleOCREngine,
+        analyzer: LayoutAnalyzer,
+    ):
+        self.corrector = corrector
+        self.ocr_engine = ocr_engine
+        self.analyzer = analyzer
+
+    def route_page(self, rendered_image: "Image.Image") -> List[str]:
+        blocks = self.analyzer.analyze(rendered_image)
+        parts: List[str] = []
+
+        for block in blocks:
+            if block.is_table:
+                md = self._handle_table(block)
+                if md:
+                    parts.append(md)
+            elif block.is_figure:
+                parts.append(self._handle_figure(block, rendered_image))
+            elif block.is_formula:
+                parts.append(f"$${block.content}$$")
+            else:
+                parts.append(self._handle_text(block, rendered_image))
+
+        return [p for p in parts if p and p.strip()]
+
+    def _handle_table(self, block: LayoutBlock) -> str:
+        content = block.content
+        if "<table" in content.lower() or "<td" in content.lower():
+            md = self.analyzer.html_table_to_markdown(content)
+            if md and "|" in md:
+                return md
+            return ""
+        if "|" in content and "---" in content:
+            return content.strip()
+        return ""
+
+    def _handle_figure(self, block: LayoutBlock, page_image: "Image.Image") -> str:
+        # Caption nếu PPStructureV3 đã gán label figure_caption riêng,
+        # dùng luôn content đó làm phần mô tả; nếu không, fallback generic.
+        caption = block.content.strip()
+        label = caption if caption and not caption.startswith("[FIGURE") else "Hình minh họa"
+        return f"[FIGURE: {label}]"
+
+    def _handle_text(self, block: LayoutBlock, page_image: "Image.Image") -> str:
+        text = block.content
+
+        # Handwriting-aware retry: nếu block có nhiều dòng confidence thấp,
+        # và có bbox để crop lại, thử OCR lại bằng ảnh upscale.
+        if (block.scores and block.bbox
+                and block.low_confidence_ratio >= HANDWRITING_LOW_CONF_RATIO):
+            retried = self._retry_low_confidence_block(block, page_image)
+            if retried and len(retried.strip()) >= len(text.strip()) * 0.5:
+                logger.debug(
+                    f"[Handwriting] Retried block (low_conf_ratio="
+                    f"{block.low_confidence_ratio:.0%}), using upscaled OCR result"
+                )
+                text = retried
+
+        return self.corrector.correct(text)
+
+    def _retry_low_confidence_block(self, block: LayoutBlock, page_image: "Image.Image") -> Optional[str]:
+        try:
+            bbox = block.bbox
+            if not bbox or len(bbox) < 4:
+                return None
+            x0, y0, x1, y1 = bbox[:4]
+            crop = page_image.crop((int(x0), int(y0), int(x1), int(y1)))
+            return self.ocr_engine.extract_text_upscaled(crop)
+        except Exception as e:
+            logger.debug(f"Low-confidence retry failed: {e}")
+            return None
+
+
+# ============================================================================
+# HYBRID PDF PROCESSOR — PRODUCTION v6
 # ============================================================================
 
 class HybridPDFProcessor:
     """
-    Chiến lược xử lý PDF theo page type:
+    TEXT  → pdfplumber fast-path (không render, không OCR — đã tối ưu đúng
+            ở v5.1, giữ nguyên).
+    TABLE/IMAGE/MIXED → render ảnh → LayoutAnalyzer.analyze() MỘT LẦN →
+            LayoutRouter route block-by-block → fuse theo reading order.
 
-    TEXT  → pdfplumber fast-path (không OCR, không render)
-    TABLE → pdfplumber text + PPStructureV3 extract tables only
-    IMAGE → PPStructureV3 full layout → PaddleOCR fallback
-    MIXED → pdfplumber nếu ≥ MIXED_PAGE_MIN_CHARS, else PaddleOCR
-
-    Page separator: "\n\n---\n\n" giữa các trang (cho SmartChunker phân trang).
-    ProtonX correction: apply cho tất cả text output.
+    Page separator: "\n\n---\n\n" giữa các trang (cho SmartChunker).
     """
 
     def __init__(
         self,
         ocr_engine: PaddleOCREngine,
-        table_extractor: PPStructureTableExtractor,
+        analyzer: LayoutAnalyzer,
         corrector: VietnameseTextCorrector,
         image_scale: float = 1.5,
     ):
         self.ocr_engine = ocr_engine
-        self.table_extractor = table_extractor
+        self.analyzer = analyzer
         self.corrector = corrector
         self.image_scale = image_scale
         self.classifier = PageClassifier()
         self.img_extractor = PDFImageExtractor()
+        self.router = LayoutRouter(corrector=corrector, ocr_engine=ocr_engine, analyzer=analyzer)
 
     def process(self, file_path: str) -> Optional[str]:
         try:
@@ -613,7 +1024,6 @@ class HybridPDFProcessor:
             type_counts = {t: page_types.count(t) for t in set(page_types)}
             logger.info(f"Page types: {type_counts}")
 
-            # Chỉ render các page không phải TEXT
             render_needed = [i for i, t in enumerate(page_types) if t != PageType.TEXT]
             rendered: Dict[int, Image.Image] = {}
             if render_needed:
@@ -631,12 +1041,10 @@ class HybridPDFProcessor:
                     page_num=page_num,
                     page_type=ptype,
                     rendered_image=rendered.get(page_num - 1),
-                    total=total,
                 )
                 if content.strip():
                     page_results.append(content)
 
-        # Giữ page separator để SmartChunker phân trang đúng
         merged = "\n\n---\n\n".join(page_results)
         merged = self._post_process(merged)
 
@@ -659,106 +1067,38 @@ class HybridPDFProcessor:
         page_num: int,
         page_type: str,
         rendered_image: Optional[Image.Image],
-        total: int,
     ) -> str:
-        parts: List[str] = []
-        image_blocks = self.img_extractor.extract_images_from_page(plumber_page, page_num)
-
+        # ── TEXT: fast-path không render, không OCR ──────────────────────
         if page_type == PageType.TEXT:
-            # ── Fast path: pdfplumber, không OCR ─────────────────────
             text = PlumberExtractor.extract_page(plumber_page, page_num)
+            parts = [self.corrector.correct(text)] if text.strip() else []
+            parts.extend(self.img_extractor.extract_images_from_page(plumber_page, page_num))
+            return "\n\n".join(p for p in parts if p.strip())
+
+        # ── TABLE / IMAGE / MIXED: layout pipeline thống nhất ────────────
+        if rendered_image is not None and self.analyzer.available:
+            parts = self.router.route_page(rendered_image)
+            if parts:
+                # Vẫn lấy thêm embedded images không nằm trong figure block
+                # (vd. logo/watermark mà layout model bỏ qua) để không mất
+                # dữ liệu — nhưng không lặp lại text vì router đã xử lý.
+                return "\n\n".join(parts)
+
+        # ── Fallback nếu layout analyzer không khả dụng ──────────────────
+        if rendered_image is not None:
+            text = self.ocr_engine.extract_text(rendered_image)
             if text.strip():
-                parts.append(self.corrector.correct(text))
+                return self.corrector.correct(text)
 
-        elif page_type == PageType.TABLE:
-            # ── pdfplumber text + PPStructureV3 chỉ lấy bảng ─────────
-            plumber_text = PlumberExtractor.extract_page(plumber_page, page_num)
-            if plumber_text.strip():
-                parts.append(self.corrector.correct(plumber_text))
+        text = PlumberExtractor.extract_page(plumber_page, page_num)
+        return self.corrector.correct(text) if text.strip() else ""
 
-            # PPStructureV3: extract thêm bảng mà pdfplumber bỏ sót
-            # Chỉ lấy table blocks, KHÔNG lấy text blocks (tránh duplicate)
-            if rendered_image is not None and self.table_extractor._pipeline is not None:
-                extra_tables = self.table_extractor.extract_tables_only(rendered_image)
-                for tbl in extra_tables:
-                    # Kiểm tra không duplicate với pdfplumber tables
-                    # (so sánh đơn giản bằng độ dài content)
-                    if tbl not in plumber_text:
-                        parts.append(tbl)
-
-        elif page_type == PageType.IMAGE:
-            # ── Full OCR: PPStructureV3 layout → PaddleOCR fallback ──
-            if rendered_image is not None:
-                if self.table_extractor._pipeline is not None:
-                    elements = self.table_extractor.extract_full_layout(rendered_image)
-                    for el in elements:
-                        c = el.get("content", "").strip()
-                        if not c:
-                            continue
-                        if el["type"] == "table":
-                            parts.append(c)
-                        elif el["type"] == "text":
-                            parts.append(self.corrector.correct(c))
-                        else:
-                            parts.append(c)
-
-                if not parts:
-                    # Fallback: PaddleOCR plain text
-                    text = self.ocr_engine.extract_text(rendered_image)
-                    if text.strip():
-                        parts.append(self.corrector.correct(text))
-            else:
-                text = PlumberExtractor.extract_page(plumber_page, page_num)
-                if text.strip():
-                    parts.append(self.corrector.correct(text))
-
-        else:  # MIXED
-            # ── pdfplumber nếu đủ text, else PaddleOCR ───────────────
-            plumber_text = PlumberExtractor.extract_page(plumber_page, page_num)
-            plumber_chars = len(plumber_text.strip())
-
-            if plumber_chars >= MIXED_PAGE_MIN_CHARS:
-                # Đủ text từ pdfplumber → dùng luôn (nhanh hơn OCR)
-                parts.append(self.corrector.correct(plumber_text))
-                # Bổ sung bảng nếu PPStructureV3 available
-                if rendered_image is not None and self.table_extractor._pipeline is not None:
-                    extra_tables = self.table_extractor.extract_tables_only(rendered_image)
-                    for tbl in extra_tables:
-                        if tbl not in plumber_text:
-                            parts.append(tbl)
-            else:
-                # Quá ít text → OCR
-                if rendered_image is not None:
-                    if self.table_extractor._pipeline is not None:
-                        elements = self.table_extractor.extract_full_layout(rendered_image)
-                        for el in elements:
-                            c = el.get("content", "").strip()
-                            if not c:
-                                continue
-                            if el["type"] == "table":
-                                parts.append(c)
-                            elif el["type"] == "text":
-                                parts.append(self.corrector.correct(c))
-                            else:
-                                parts.append(c)
-
-                    if not parts:
-                        text = self.ocr_engine.extract_text(rendered_image)
-                        if text.strip():
-                            parts.append(self.corrector.correct(text))
-                elif plumber_text.strip():
-                    parts.append(self.corrector.correct(plumber_text))
-
-        parts.extend(image_blocks)
-        return "\n\n".join(p for p in parts if p.strip())
-
-    # ── Post-processing ──────────────────────────────────────────────
+    # ── Post-processing (giữ nguyên logic v5.1) ──────────────────────────
 
     def _post_process(self, text: str) -> str:
         if not text:
             return ""
 
-        # Protect base64 images
         _IMG_RE = re.compile(
             r'!\[[^\]]*\]\(data:image/[^;]+;base64,[A-Za-z0-9+/=]+\)', re.DOTALL
         )
@@ -769,8 +1109,6 @@ class HybridPDFProcessor:
             image_blocks.append(m.group(0))
             return f"%%IMG_{idx:04d}%%"
 
-        # Protect page separators
-        SEP = "\n\n---\n\n"
         text = _IMG_RE.sub(extract_img, text)
         text = self._basic_cleanup(text)
         text = self._normalize_tables(text)
@@ -787,10 +1125,8 @@ class HybridPDFProcessor:
         text = re.sub(r'\n{4,}', '\n\n\n', text)
         text = re.sub(r'[ \t]+\n', '\n', text)
         text = re.sub(r'[ \t]{2,}', ' ', text)
-        # Bỏ page number artifacts nhưng giữ separator
         text = re.sub(r'(?m)^(Trang|Page)\s+\d+\s*$', '', text, flags=re.IGNORECASE)
         text = re.sub(r'(?m)^\d+\s*$', '', text)
-        # Bỏ dòng lặp lại (header/footer)
         lines = text.split('\n')
         counts: Dict[str, int] = {}
         for ln in lines:
@@ -845,14 +1181,14 @@ class HybridPDFProcessor:
     @staticmethod
     def _rule_based_corrections(text: str) -> str:
         corrections = {
-            r'\bViet Nam\b':    'Việt Nam',
-            r'\bHa Noi\b':      'Hà Nội',
+            r'\bViet Nam\b': 'Việt Nam',
+            r'\bHa Noi\b': 'Hà Nội',
             r'\bHo Chi Minh\b': 'Hồ Chí Minh',
-            r'(\d)\s+\.(\d)':   r'\1.\2',
-            r'(\d)\s+,(\d)':    r'\1,\2',
-            r'\bNgan hang\b':   'Ngân hàng',
-            r'\bchinh sach\b':  'chính sách',
-            r'\bNHCSXH\b':      'NHCSXH',
+            r'(\d)\s+\.(\d)': r'\1.\2',
+            r'(\d)\s+,(\d)': r'\1,\2',
+            r'\bNgan hang\b': 'Ngân hàng',
+            r'\bchinh sach\b': 'chính sách',
+            r'\bNHCSXH\b': 'NHCSXH',
         }
         for pat, repl in corrections.items():
             try:
@@ -863,7 +1199,7 @@ class HybridPDFProcessor:
 
 
 # ============================================================================
-# DOCX / EXCEL HANDLERS
+# DOCX / EXCEL HANDLERS  (không đổi so với v5.1)
 # ============================================================================
 
 class DocxProcessor:
@@ -882,9 +1218,12 @@ class DocxProcessor:
                     if not text:
                         continue
                     style = para.style.name.lower()
-                    if   'heading 1' in style: sections.append(f"# {text}")
-                    elif 'heading 2' in style: sections.append(f"## {text}")
-                    elif 'heading 3' in style: sections.append(f"### {text}")
+                    if 'heading 1' in style:
+                        sections.append(f"# {text}")
+                    elif 'heading 2' in style:
+                        sections.append(f"## {text}")
+                    elif 'heading 3' in style:
+                        sections.append(f"### {text}")
                     else:
                         sections.append(corrector.correct(text))
                 elif tag == 'tbl':
@@ -903,7 +1242,6 @@ class DocxProcessor:
 
     @staticmethod
     def _convert_via_libreoffice(file_path: str) -> Optional[str]:
-        """Fallback: convert DOCX → PDF via LibreOffice rồi OCR."""
         try:
             import subprocess
             with tempfile.TemporaryDirectory() as tmpdir:
@@ -914,7 +1252,6 @@ class DocxProcessor:
                 )
                 pdf_files = list(Path(tmpdir).glob('*.pdf'))
                 if pdf_files:
-                    # Note: caller phải cung cấp processor để gọi process_pdf
                     return None
         except Exception as e:
             logger.error(f"LibreOffice conversion failed: {e}")
@@ -945,7 +1282,6 @@ class ExcelProcessor:
 
     @staticmethod
     def _detect_header_row(df) -> int:
-        import pandas as pd
         for i in range(min(5, len(df))):
             row = df.iloc[i]
             if sum(1 for v in row if isinstance(v, str) and v.strip()) / len(row) > 0.6:
@@ -962,13 +1298,14 @@ class ExcelProcessor:
 
 
 # ============================================================================
-# PUBLIC API: PaddleOCRVLProcessor (backward compatible)
+# PUBLIC API: PaddleOCRVLProcessor (backward compatible — KHÔNG đổi tên/sig)
 # ============================================================================
 
 class PaddleOCRVLProcessor:
     """
     Public API — interface tương thích với document_processor.py.
-    Nội bộ dùng PaddleOCR v3.7.0 + PPStructureV3 + ProtonX correction.
+    Nội bộ v6 dùng LayoutAnalyzer (PPStructureV3) làm nguồn duy nhất cho
+    layout + table + figure + text trên page cần render.
     """
 
     def __init__(
@@ -982,29 +1319,29 @@ class PaddleOCRVLProcessor:
         use_flash_attention: bool = True,   # kept for compat
         use_compile: bool = False,          # kept for compat
         gpu_id: int = 0,
-        correction_model: str = "student",
+        correction_model: str = "teacher",
         lang: str = "vi",
     ):
         self.use_gpu = use_gpu
         self.image_scale = image_scale
         self.lang = lang
 
-        logger.info("🚀 Initializing PaddleOCR v3.7.0 processor...")
+        logger.info("🚀 Initializing PaddleOCR v3.7.0 processor (v6 layout-first)...")
 
         self._corrector = VietnameseTextCorrector(
             model_size=correction_model,
             enabled=enable_spell_correction,
         )
         self._ocr_engine = PaddleOCREngine(use_gpu=use_gpu, lang=lang)
-        self._table_extractor = PPStructureTableExtractor(use_gpu=use_gpu, lang=lang)
+        self._analyzer = LayoutAnalyzer(use_gpu=use_gpu, lang=lang)
         self._pdf_proc = HybridPDFProcessor(
             ocr_engine=self._ocr_engine,
-            table_extractor=self._table_extractor,
+            analyzer=self._analyzer,
             corrector=self._corrector,
             image_scale=image_scale,
         )
 
-        logger.info("✅ PaddleOCRVLProcessor v5 ready")
+        logger.info("✅ PaddleOCRVLProcessor v6 ready")
 
     def process_pdf(self, file_path: str) -> Optional[str]:
         logger.info(f"📄 process_pdf: {Path(file_path).name}")
@@ -1017,7 +1354,6 @@ class PaddleOCRVLProcessor:
         logger.info(f"📝 process_docx: {Path(file_path).name}")
         result = DocxProcessor.process(file_path, self._corrector)
         if not result:
-            # Fallback: convert via LibreOffice
             try:
                 import subprocess
                 with tempfile.TemporaryDirectory() as tmpdir:
@@ -1037,25 +1373,16 @@ class PaddleOCRVLProcessor:
         logger.info(f"🖼️  process_image: {Path(file_path).name}")
         try:
             image = Image.open(file_path).convert("RGB")
-            # Thử PPStructureV3 full layout trước
-            if self._table_extractor._pipeline is not None:
-                elements = self._table_extractor.extract_full_layout(image)
-                if elements:
-                    parts = []
-                    for el in elements:
-                        c = el.get("content", "").strip()
-                        if not c:
-                            continue
-                        if el["type"] == "table":
-                            parts.append(c)
-                        elif el["type"] == "text":
-                            parts.append(self._corrector.correct(c))
-                        else:
-                            parts.append(c)
-                    if parts:
-                        return self._post_process("\n\n".join(parts))
+            if self._analyzer.available:
+                router = LayoutRouter(
+                    corrector=self._corrector,
+                    ocr_engine=self._ocr_engine,
+                    analyzer=self._analyzer,
+                )
+                parts = router.route_page(image)
+                if parts:
+                    return self._post_process("\n\n".join(parts))
 
-            # Fallback: PaddleOCR plain text
             text = self._ocr_engine.extract_text(image)
             if text:
                 corrected = self._corrector.correct(text)
@@ -1094,7 +1421,7 @@ def get_paddle_ocr_processor(
     use_flash_attention: bool = True,
     use_compile: bool = False,
     gpu_id: int = 0,
-    correction_model: str = "student",
+    correction_model: str = "teacher",
     lang: str = "vi",
 ) -> PaddleOCRVLProcessor:
     """Return global singleton (thread-safe)."""

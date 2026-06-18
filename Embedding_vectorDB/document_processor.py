@@ -1,9 +1,16 @@
 #!/usr/bin/env python3
 """
-document_processor.py — Vietnamese Document Pipeline (v4)
-==========================================================
-Nâng cấp so với v3:
+document_processor.py — Vietnamese Document Pipeline (v4.1)
+==============================================================
+Nâng cấp so với v4:
 
+FIX (v4.1):
+  - Thêm gpu_id param, truyền xuống get_paddle_ocr_processor() để hỗ trợ
+    chọn GPU cụ thể trên máy nhiều GPU (vd. 2x NVIDIA L40). Trước đây
+    gpu_id tồn tại sẵn trong PaddleOCRVLProcessor nhưng không được dùng
+    ("kept for compat") vì DocumentProcessor không bao giờ truyền nó.
+
+Nâng cấp so với v3 (giữ nguyên):
 ENGINE THAY ĐỔI:
   - PaddleOCR v3.7.0 + PP-StructureV3 thay vì PaddleOCR-VL HuggingFace model
   - PP-OCRv5 recognition model (tốt hơn, nhẹ hơn)
@@ -25,6 +32,7 @@ OVERSIZED CHUNK FIX (giữ nguyên v3)
 CONFIG:
   - Thêm correction_model: str = "student" (teacher/student/nano)
   - Thêm lang: str = "vi"
+  - Thêm gpu_id: int = 0 (NEW v4.1)
 """
 
 from __future__ import annotations
@@ -830,8 +838,9 @@ class DocumentProcessor:
     def __init__(
         self,
         use_gpu: bool = True,
-        correction_model: str = "student",   # NEW: teacher / student / nano
-        lang: str = "vi",                     # NEW: OCR language
+        correction_model: str = "student",   # teacher / student / nano
+        lang: str = "vi",                     # OCR language
+        gpu_id: int = 0,                      # NEW v4.1: chọn GPU cụ thể
     ):
         self.use_gpu = use_gpu
         from paddle_ocr_processor import get_paddle_ocr_processor
@@ -842,6 +851,7 @@ class DocumentProcessor:
             enable_table_normalization=True,
             correction_model=correction_model,
             lang=lang,
+            gpu_id=gpu_id,
         )
         logger.info("✅ PaddleOCR v3.7.0 processor ready")
         self.chunker = SmartChunker(

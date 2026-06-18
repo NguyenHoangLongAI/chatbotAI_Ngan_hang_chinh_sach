@@ -17,11 +17,19 @@ requests==2.32.3
 # THAY THẾ hoàn toàn PaddleOCR-VL HuggingFace model
 paddleocr==3.7.0
 
-# PaddlePaddle framework — chọn 1 trong 3 tùy môi trường:
-# GPU CUDA 11.x:  paddlepaddle-gpu==3.0.0.post112
-# GPU CUDA 12.x:  paddlepaddle-gpu==3.0.0.post126
-# CPU only:
-paddlepaddle==3.0.0
+# PaddlePaddle framework — FIX: Dockerfile base image là
+# nvidia/cuda:12.1.1-cudnn8-runtime-ubuntu22.04 và config.py /
+# docker-compose.yml đặt USE_GPU=true, nên BẮT BUỘC dùng bản GPU
+# khớp CUDA 12.x, không phải bản CPU "paddlepaddle==3.0.0" cũ
+# (bản cũ khiến container chạy OCR trên CPU một cách âm thầm,
+# không có lỗi/log rõ ràng nào báo cho biết).
+#
+# Nếu đổi base image sang CUDA 11.x, đổi dòng dưới thành:
+#   paddlepaddle-gpu==3.0.0.post112
+# Nếu chạy CPU-only (không có GPU), đổi lại thành:
+#   paddlepaddle==3.0.0
+--find-links https://www.paddlepaddle.org.cn/packages/stable/cu126/
+paddlepaddle-gpu==3.0.0.post126
 
 # ── TORCH (CUDA 12.1) — dùng cho sentence-transformers + embedding ──
 --extra-index-url https://download.pytorch.org/whl/cu121
@@ -29,14 +37,23 @@ torch==2.2.2+cu121
 torchvision==0.17.2+cu121
 
 # ── Transformers — chỉ cần cho embedding, KHÔNG dùng PaddleOCR-VL nữa ──
-transformers>=4.51.0
-tokenizers>=0.20.0
-accelerate>=0.28.0
+# FIX: ">=4.51.0" không có upper bound nên pip resolve lên thẳng
+# transformers 5.x (thấy rõ trong log cài đặt: "Successfully installed
+# transformers-5.12.1" / "5.8.1"). transformers 5.x đổi nhiều API so với
+# 4.x (vd. cách load custom class qua get_class_from_dynamic_module,
+# masking_utils...) và đã từng cần patch thủ công (patch_model.py) để
+# tương thích — pin chặt trong khoảng 4.x để tránh breaking change
+# ngoài ý muốn mỗi khi rebuild image.
+transformers>=4.51.0,<5.0.0
+tokenizers>=0.20.0,<0.21.0
+accelerate>=0.28.0,<0.34.0
 sentence-transformers==2.6.0
 
 # ── Vietnamese Text Correction (ProtonX) ─────────────────────
 # Offline mode: tự download model từ HuggingFace lần đầu
 # Models: teacher (904MB) / student (507MB) / nano
+# NOTE: protonx>=0.1.8 kéo theo transformers mới nhất nếu không pin
+# transformers ở trên — đã fix bằng upper bound <5.0.0 phía trên.
 protonx>=0.1.8
 
 # ── PDF Processing ────────────────────────────────────────────
@@ -72,4 +89,3 @@ langgraph==0.0.50
 # ── OCR Fallback (Tesseract) — chỉ dùng khi PaddleOCR fail ──
 # TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
 pytesseract
-

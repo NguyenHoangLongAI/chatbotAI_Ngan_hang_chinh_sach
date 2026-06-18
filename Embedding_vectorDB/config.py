@@ -39,7 +39,7 @@ class Config:
     #   "teacher"  → protonx-models/protonx-legal-tc         (904MB, ROUGE-L 98.44)
     #   "student"  → protonx-models/distilled-protonx-legal-tc (507MB, ROUGE-L 97.64)
     #   "nano"     → protonx-models/nano-protonx-legal-tc    (smallest, fastest)
-    CORRECTION_MODEL: str = os.getenv("CORRECTION_MODEL", "student")
+    CORRECTION_MODEL: str = os.getenv("CORRECTION_MODEL", "teacher")
 
     # ===== TABLE PROCESSING =====
     # Enable table normalization (TSV / aligned-space → Markdown)

@@ -120,6 +120,10 @@ services:
               capabilities: [gpu, compute, utility]
     environment:
       - CUDA_VISIBLE_DEVICES=0
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+      - HF_DATASETS_OFFLINE=1
+      - HF_HUB_DISABLE_TELEMETRY=1
       - NVIDIA_VISIBLE_DEVICES=0
       - MILVUS_HOST=milvus
       - MILVUS_PORT=19530

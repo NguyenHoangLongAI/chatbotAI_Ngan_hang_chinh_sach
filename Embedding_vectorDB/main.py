@@ -15,6 +15,10 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import tempfile
 import os
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+os.environ.setdefault("TRANSFORMERS_OFFLINE", "1")
+os.environ.setdefault("HF_DATASETS_OFFLINE", "1")
+os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
 import uuid
 import re
 import io
